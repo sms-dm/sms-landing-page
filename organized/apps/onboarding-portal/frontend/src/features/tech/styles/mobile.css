@@ -1,0 +1,252 @@
+/* Mobile-first optimizations for technician interface */
+
+/* Touch-friendly tap targets */
+.tech-interface button,
+.tech-interface a,
+.tech-interface input,
+.tech-interface select,
+.tech-interface textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent double-tap zoom on iOS */
+.tech-interface {
+  touch-action: manipulation;
+}
+
+/* Larger touch targets for photo capture */
+.photo-capture-button {
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+/* Full-width forms on mobile */
+@media (max-width: 640px) {
+  .tech-form-container {
+    padding: 16px;
+  }
+
+  .tech-form-container .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stack navigation buttons */
+  .tech-nav-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tech-nav-buttons button {
+    width: 100%;
+  }
+}
+
+/* Optimized card layouts */
+.assignment-card {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.assignment-card:active {
+  transform: scale(0.98);
+}
+
+/* Progress indicator optimizations */
+.progress-steps {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.progress-steps::-webkit-scrollbar {
+  display: none;
+}
+
+/* Photo preview optimizations */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Offline indicator */
+.offline-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 14px;
+  z-index: 1000;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
+}
+
+.offline-indicator.show {
+  transform: translateY(0);
+}
+
+/* Loading states */
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Quality score visualization */
+.quality-score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quality-score-ring svg {
+  transform: rotate(-90deg);
+}
+
+.quality-score-value {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Touch-friendly form controls */
+.tech-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* Floating action button for mobile */
+.fab {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+/* Swipeable cards */
+.swipeable-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.swipe-action {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: medium;
+  transition: all 0.3s;
+}
+
+.swipe-action.left {
+  left: 0;
+  background: #10b981;
+  transform: translateX(-100%);
+}
+
+.swipe-action.right {
+  right: 0;
+  background: #ef4444;
+  transform: translateX(100%);
+}
+
+.swipeable-card.swiping-left .swipe-action.left {
+  transform: translateX(0);
+}
+
+.swipeable-card.swiping-right .swipe-action.right {
+  transform: translateX(0);
+}
+
+/* Responsive image containers */
+.photo-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 75%; /* 4:3 aspect ratio */
+  overflow: hidden;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.photo-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Pull to refresh */
+.pull-to-refresh {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.pull-to-refresh.pulling {
+  top: 20px;
+}
+
+.pull-to-refresh.refreshing {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}

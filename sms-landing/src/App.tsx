@@ -1,0 +1,72 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import ActivationHelpPage from './pages/ActivationHelpPage';
+import ComingSoonPage from './pages/ComingSoonPage';
+import WarpTransition from './pages/WarpTransition';
+import NeuralBackground from './components/NeuralBackground';
+import { useEffect, useState } from 'react';
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Check auth on initial load
+    return localStorage.getItem('sms-preview-auth') === 'true';
+  });
+
+  useEffect(() => {
+    // Listen for storage changes (in case of logout in another tab)
+    const handleStorageChange = () => {
+      setIsAuthenticated(localStorage.getItem('sms-preview-auth') === 'true');
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  return (
+    <Router>
+      <Routes>
+        {/* Coming Soon page - no background needed, it has its own */}
+        <Route path="/" element={<ComingSoonPage />} />
+        
+        {/* Warp transition after login */}
+        <Route path="/warp" element={
+          isAuthenticated ? <WarpTransition /> : <Navigate to="/" />
+        } />
+        
+        {/* Protected preview routes */}
+        <Route path="/preview" element={
+          isAuthenticated ? (
+            <div className="min-h-screen bg-sms-deepBlue relative">
+              <div className="neural-bg"></div>
+              <NeuralBackground />
+              <HomePage />
+            </div>
+          ) : (
+            <Navigate to="/" />
+          )
+        } />
+        
+        {/* Login route - always accessible */}
+        <Route path="/login" element={
+          <div className="min-h-screen bg-sms-deepBlue relative">
+            <div className="neural-bg"></div>
+            <NeuralBackground />
+            <LoginPage />
+          </div>
+        } />
+        
+        {/* Activation help - always accessible */}
+        <Route path="/activation-help" element={
+          <div className="min-h-screen bg-sms-deepBlue relative">
+            <div className="neural-bg"></div>
+            <NeuralBackground />
+            <ActivationHelpPage />
+          </div>
+        } />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

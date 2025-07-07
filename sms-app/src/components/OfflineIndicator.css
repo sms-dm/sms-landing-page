@@ -1,0 +1,53 @@
+.offline-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.offline-indicator .ant-tag {
+  margin: 0;
+}
+
+.offline-message {
+  padding: 12px;
+  background: #fff2e8;
+  border: 1px solid #ffbb96;
+  border-radius: 4px;
+}
+
+.offline-message .ant-typography {
+  margin: 0;
+}
+
+/* Animation for sync icon */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.offline-indicator .anticon-cloud-sync {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .offline-indicator {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .ant-drawer-content-wrapper {
+    width: 100% !important;
+    max-width: 400px;
+  }
+}

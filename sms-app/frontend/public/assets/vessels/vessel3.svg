@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <!-- Sunset ocean background -->
+  <defs>
+    <linearGradient id="sunset" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0033;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#330033;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003366;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect fill="url(#sunset)" width="1200" height="600"/>
+  
+  <!-- Sun/moon -->
+  <circle cx="150" cy="150" r="40" fill="#FF6B6B" opacity="0.3"/>
+  
+  <!-- Calm water -->
+  <path fill="#003d5c" d="M0 360 C300 340, 600 360, 900 340 C1050 330, 1200 340, 1200 340 L1200 600 L0 600 Z"/>
+  <path fill="#004466" opacity="0.5" d="M0 380 C300 360, 600 380, 900 360 C1050 350, 1200 360, 1200 360 L1200 600 L0 600 Z"/>
+  
+  <!-- Platform Supply Vessel -->
+  <g transform="translate(300, 240)">
+    <!-- Hull with cargo deck -->
+    <path fill="#1a1a2e" d="M0 100 L40 120 L560 120 L600 100 L590 85 L10 85 Z"/>
+    
+    <!-- Cargo deck -->
+    <rect x="20" y="80" width="400" height="5" fill="#333"/>
+    
+    <!-- Pipe rack -->
+    <g stroke="#666" stroke-width="2" fill="none">
+      <line x1="50" y1="75" x2="50" y2="80"/>
+      <line x1="100" y1="75" x2="100" y2="80"/>
+      <line x1="150" y1="75" x2="150" y2="80"/>
+      <line x1="200" y1="75" x2="200" y2="80"/>
+      <line x1="250" y1="75" x2="250" y2="80"/>
+    </g>
+    
+    <!-- Accommodation block -->
+    <rect x="420" y="45" width="140" height="35" fill="#2d2d44"/>
+    <rect x="440" y="25" width="100" height="20" fill="#2d2d44"/>
+    
+    <!-- Bridge windows -->
+    <g fill="#00CED1" opacity="0.6">
+      <rect x="450" y="30" width="12" height="8"/>
+      <rect x="468" y="30" width="12" height="8"/>
+      <rect x="486" y="30" width="12" height="8"/>
+      <rect x="504" y="30" width="12" height="8"/>
+      <rect x="522" y="30" width="12" height="8"/>
+    </g>
+    
+    <!-- Cargo cranes -->
+    <rect x="350" y="60" width="8" height="20" fill="#2d2d44"/>
+    <path stroke="#2d2d44" stroke-width="4" fill="none" d="M354 60 L370 50 L380 55"/>
+    
+    <!-- Containers on deck -->
+    <rect x="100" y="70" width="40" height="10" fill="#c41e3a" opacity="0.8"/>
+    <rect x="145" y="70" width="40" height="10" fill="#1e3a8a" opacity="0.8"/>
+    <rect x="190" y="70" width="40" height="10" fill="#059669" opacity="0.8"/>
+    
+    <!-- Helideck -->
+    <ellipse cx="480" cy="80" rx="35" ry="18" fill="#333" opacity="0.5"/>
+    <text x="470" y="85" fill="#FFF" font-size="16" font-weight="bold">H</text>
+  </g>
+  
+  <!-- Wake effect -->
+  <path stroke="#FFF" stroke-width="1" fill="none" opacity="0.3" d="M250 360 Q200 360, 150 365"/>
+  
+  <!-- Vessel name -->
+  <text x="600" y="550" font-family="Arial" font-size="24" fill="#666" text-anchor="middle" opacity="0.5">MV NORTHERN PIONEER</text>
+</svg>
