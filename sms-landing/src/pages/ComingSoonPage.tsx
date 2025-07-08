@@ -79,30 +79,30 @@ const ComingSoonPage: React.FC = () => {
       </AnimatePresence>
 
       {/* Main content */}
-      <div className="relative z-10 w-full h-screen flex flex-col">
-        {/* Logo with secret click area - positioned at top */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 2.5, duration: 1 }}
-          className="select-none pt-20"
-          onClick={handleLogoClick}
-        >
-          <img 
-            src="/smart-maintenance-logo.jpg" 
-            alt="SMS Logo" 
-            className="w-64 h-64 md:w-80 md:h-80 mx-auto glow-effect"
-            draggable={false}
-          />
-        </motion.div>
+      <div className="relative z-10 w-full h-screen flex items-center justify-center px-4">
+        <div className="flex flex-col items-center justify-center space-y-8 md:space-y-12">
+          {/* Logo with secret click area */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 2.5, duration: 1 }}
+            className="select-none"
+            onClick={handleLogoClick}
+          >
+            <img 
+              src="/smart-maintenance-logo.jpg" 
+              alt="SMS Logo" 
+              className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 glow-effect"
+              draggable={false}
+            />
+          </motion.div>
 
-        {/* Coming Soon Text - centered in remaining space */}
-        <div className="flex-1 flex items-center justify-center">
+          {/* Coming Soon Text */}
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 3.5, duration: 1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-light tracking-[0.2em] text-gray-400"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light tracking-[0.1em] sm:tracking-[0.2em] text-gray-400 text-center"
             style={{
               fontFamily: 'monospace',
               textShadow: '0 0 20px rgba(37, 99, 235, 0.3)'
