@@ -28,7 +28,7 @@ const ActivationHelpPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const MAX_ATTEMPTS = 5;
-  const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:3005';
+  const BACKEND_URL = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:3005';
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
