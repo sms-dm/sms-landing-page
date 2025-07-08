@@ -21,7 +21,6 @@ const ComingSoonPage: React.FC = () => {
     
     // Show glitch effect for 2 seconds
     setTimeout(() => setShowGlitch(false), 2000);
-    setTimeout(() => setIsLoading(false), 3000);
   }, [navigate]);
 
   // Handle secret click pattern (5 clicks on logo)
