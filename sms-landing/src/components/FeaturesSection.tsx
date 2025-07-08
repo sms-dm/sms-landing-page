@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { 
   FiShield, FiUsers, FiGlobe, 
-  FiSmartphone, FiClock, FiLock,
+  FiClock,
   FiBarChart, FiWifi, FiSettings
 } from 'react-icons/fi';
 import { BsLightningCharge } from 'react-icons/bs';

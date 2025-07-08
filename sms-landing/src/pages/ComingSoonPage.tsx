@@ -8,7 +8,6 @@ const ComingSoonPage: React.FC = () => {
   const [clickCount, setClickCount] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [showGlitch, setShowGlitch] = useState(true);
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -187,7 +186,7 @@ const ComingSoonPage: React.FC = () => {
       </AnimatePresence>
 
       {/* Glitch CSS */}
-      <style jsx>{`
+      <style>{`
         .glow-effect {
           filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.5));
           animation: pulse 2s ease-in-out infinite;

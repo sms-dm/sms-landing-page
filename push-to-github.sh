@@ -3,12 +3,15 @@
 # Push SMS code to GitHub
 echo "📦 Preparing to push SMS code to GitHub..."
 
-# Add your GitHub repository URL here
-echo "Please enter your GitHub repository URL (e.g., https://github.com/yourusername/SMS.git):"
-read GITHUB_URL
-
-# Add the remote
-git remote add origin $GITHUB_URL
+# Check if we have a remote
+if git remote -v | grep -q origin; then
+    echo "Remote 'origin' already exists"
+else
+    # Add your GitHub repository URL here
+    echo "Please enter your GitHub repository URL (e.g., https://github.com/yourusername/SMS.git):"
+    read GITHUB_URL
+    git remote add origin $GITHUB_URL
+fi
 
 # Make sure we're on master branch
 git checkout master
