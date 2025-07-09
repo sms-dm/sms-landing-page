@@ -81,7 +81,7 @@ app.get('/health', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       environment: config.env,
@@ -98,7 +98,7 @@ app.get('/health', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(503).json({
+    return res.status(503).json({
       status: 'error',
       timestamp: new Date().toISOString(),
       environment: config.env,
