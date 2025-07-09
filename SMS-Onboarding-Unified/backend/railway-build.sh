@@ -2,4 +2,6 @@
 echo "Running custom build for Railway..."
 npm install --legacy-peer-deps
 npx prisma generate --schema=../prisma/schema.prisma
+echo "Compiling TypeScript..."
+npx tsc
 echo "Build complete!"
