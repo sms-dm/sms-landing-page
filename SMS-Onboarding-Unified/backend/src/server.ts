@@ -11,7 +11,7 @@ import { sessionService } from '../services/session.service';
 import { logger, requestLogger } from '../services/logger.service';
 import { websocketService } from '../services/websocket.service';
 import { scheduledTasksService } from '../services/scheduled-tasks.service';
-import { prisma, checkDatabaseConnection } from '../lib/prisma';
+import { prisma, checkDatabaseConnection } from '../services/prisma';
 import { performDatabaseHealthCheck } from '../utils/db-health';
 import apiRoutes from '../api/routes';
 import { apiRateLimiter } from '../api/middleware/rateLimit.middleware';
