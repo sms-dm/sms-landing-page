@@ -1,4 +1,4 @@
-import { prisma, checkDatabaseConnection } from '../lib/prisma';
+import { prisma, checkDatabaseConnection } from '../services/prisma';
 import { logger } from '../services/logger.service';
 
 export interface DatabaseHealth {
