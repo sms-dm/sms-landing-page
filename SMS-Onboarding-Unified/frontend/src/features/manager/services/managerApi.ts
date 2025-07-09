@@ -134,13 +134,82 @@ export const managerApi = {
   },
 };
 
-// Mock hook for team members query (for build compatibility)
+// Type definitions
+export interface AssignmentStats {
+  totalVessels: number;
+  vesselsNeedingOnboarding: number;
+  vesselsInProgress: number;
+  vesselsCompleted: number;
+  totalTechnicians: number;
+  activeTechnicians: number;
+}
+
+// Mock hooks for build compatibility
 export const useGetTeamMembersQuery = () => {
   return {
     data: {
       teamMembers: [
         { id: '1', name: 'John Doe', role: 'technician', status: 'active' },
         { id: '2', name: 'Jane Smith', role: 'engineer', status: 'active' }
+      ]
+    },
+    isLoading: false,
+    error: null
+  };
+};
+
+export const useGetVesselsNeedingOnboardingQuery = () => {
+  return {
+    data: {
+      vessels: [
+        { id: '1', name: 'Vessel Alpha', imoNumber: 'IMO123456', status: 'pending' },
+        { id: '2', name: 'Vessel Beta', imoNumber: 'IMO789012', status: 'pending' }
+      ]
+    },
+    isLoading: false,
+    error: null
+  };
+};
+
+export const useAssignVesselMutation = () => {
+  return {
+    mutate: async (data: any) => {
+      console.log('Assigning vessel:', data);
+      return { success: true };
+    },
+    isLoading: false,
+    error: null
+  };
+};
+
+export const useGetAssignmentStatsQuery = () => {
+  return {
+    data: {
+      totalVessels: 10,
+      vesselsNeedingOnboarding: 3,
+      vesselsInProgress: 4,
+      vesselsCompleted: 3,
+      totalTechnicians: 8,
+      activeTechnicians: 5
+    } as AssignmentStats,
+    isLoading: false,
+    error: null
+  };
+};
+
+export const useGetVesselAssignmentsQuery = () => {
+  return {
+    data: {
+      assignments: [
+        {
+          id: '1',
+          vesselId: '1',
+          vesselName: 'Vessel Alpha',
+          technicianId: '1',
+          technicianName: 'John Doe',
+          assignedAt: new Date().toISOString(),
+          status: 'in_progress'
+        }
       ]
     },
     isLoading: false,
