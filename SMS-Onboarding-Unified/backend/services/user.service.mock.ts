@@ -22,8 +22,8 @@ async function initDemoUsers() {
       role: demoUser.role as UserRole,
       companyId: uuidv4(),
       isActive: true,
-      avatarUrl: null,
-      phoneNumber: null,
+      avatarUrl: undefined,
+      phoneNumber: undefined,
       preferences: {
         theme: 'light',
         language: 'en',
@@ -63,8 +63,8 @@ export class MockUserService {
       role: data.role,
       companyId: data.companyId || uuidv4(),
       isActive: true,
-      avatarUrl: null,
-      phoneNumber: null,
+      avatarUrl: undefined,
+      phoneNumber: undefined,
       preferences: {
         theme: 'light',
         language: 'en',
