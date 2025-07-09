@@ -38,12 +38,13 @@ PORT = "3006"
 [[services]]
 name = "onboarding-frontend"  
 buildCommand = "cd SMS-Onboarding-Unified && npm ci && npm run build"
-startCommand = "cd SMS-Onboarding-Unified && npm run preview"
+startCommand = "cd SMS-Onboarding-Unified && npm run start"
 port = 4173
 healthcheckPath = "/"
 
 [services.onboarding-frontend.envs]
 NODE_ENV = "production"
+PORT = "4173"
 VITE_API_BASE_URL = "https://${{services.onboarding-backend.RAILWAY_PUBLIC_DOMAIN}}"
 
 # Maintenance Backend Service
@@ -65,10 +66,11 @@ CORS_ORIGIN = "https://${{services.maintenance-frontend.RAILWAY_PUBLIC_DOMAIN}}"
 [[services]]
 name = "maintenance-frontend"
 buildCommand = "cd sms-app/frontend && npm install && npm run build"
-startCommand = "cd sms-app/frontend && npm run preview"  
+startCommand = "cd sms-app/frontend && npx serve -s build -l 4173"  
 port = 4173
 healthcheckPath = "/"
 
 [services.maintenance-frontend.envs]
 NODE_ENV = "production"
+PORT = "4173"
 VITE_API_URL = "https://${{services.maintenance-backend.RAILWAY_PUBLIC_DOMAIN}}/api"
