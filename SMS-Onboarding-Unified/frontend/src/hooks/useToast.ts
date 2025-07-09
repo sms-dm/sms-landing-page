@@ -1,17 +1,28 @@
-import { toast } from 'sonner';
+// Simple toast implementation without external dependency
+const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' | 'loading') => {
+  console.log(`[${type.toUpperCase()}]: ${message}`);
+  // In production, this would show actual toast notifications
+};
 
 export const useToast = () => {
   return {
     toast: {
-      success: (message: string) => toast.success(message),
-      error: (message: string) => toast.error(message),
-      info: (message: string) => toast.info(message),
-      warning: (message: string) => toast.warning(message),
-      loading: (message: string) => toast.loading(message),
-      dismiss: (id?: string | number) => toast.dismiss(id),
+      success: (message: string) => showToast(message, 'success'),
+      error: (message: string) => showToast(message, 'error'),
+      info: (message: string) => showToast(message, 'info'),
+      warning: (message: string) => showToast(message, 'warning'),
+      loading: (message: string) => showToast(message, 'loading'),
+      dismiss: (id?: string | number) => console.log('Toast dismissed', id),
     }
   };
 };
 
-// Re-export toast for compatibility
-export { toast };
+// Export toast object for compatibility
+export const toast = {
+  success: (message: string) => showToast(message, 'success'),
+  error: (message: string) => showToast(message, 'error'),
+  info: (message: string) => showToast(message, 'info'),
+  warning: (message: string) => showToast(message, 'warning'),
+  loading: (message: string) => showToast(message, 'loading'),
+  dismiss: (id?: string | number) => console.log('Toast dismissed', id),
+};
