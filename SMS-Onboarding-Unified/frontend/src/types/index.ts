@@ -481,3 +481,7 @@ export interface CurrentSafetyStatus {
   overallRiskLevel: 'low' | 'medium' | 'high';
   remarks?: string;
 }
+
+// Explicit exports for build compatibility
+export type { User as UserType };
+export { UserRole as UserRoleEnum };

@@ -4,7 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User, UserRole } from '@/types';
+import { UserRole } from '@/types';
+
+// Temporary type definition to avoid import issues
+interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+}
 import { 
   Search, 
   UserPlus, 
