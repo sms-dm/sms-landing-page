@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { store } from './store';
@@ -56,7 +55,6 @@ export function App() {
           <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
             <AnimatedToaster />
-            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
           </QueryClientProvider>
         </Provider>
       </EnhancedErrorBoundary>
