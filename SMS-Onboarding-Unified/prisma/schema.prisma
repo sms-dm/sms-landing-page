@@ -254,6 +254,8 @@ model Equipment {
   documents        Document[]
   qualityScores    QualityScore[]
   transfers        EquipmentTransfer[]
+  verifications    EquipmentVerification[]
+  verificationNotifications VerificationNotification[]
 
   @@index([vesselId])
   @@index([locationId])
