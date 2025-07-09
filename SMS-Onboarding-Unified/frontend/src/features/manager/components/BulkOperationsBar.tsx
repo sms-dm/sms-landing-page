@@ -16,7 +16,7 @@ import {
 import { useGetTeamMembersQuery } from '../services/managerApi';
 import { EquipmentStatus, CriticalLevel } from '@/types';
 import { X, UserPlus, Edit, Trash, CheckCircle } from 'lucide-react';
-import { toast } from '@/components/ui/toaster';
+import { toast } from '@/utils/toast';
 
 interface Props {
   selectedCount: number;

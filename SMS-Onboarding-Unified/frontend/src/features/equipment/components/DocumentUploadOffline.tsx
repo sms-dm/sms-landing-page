@@ -11,7 +11,7 @@ import {
   WifiOffIcon
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { toast } from '@/components/ui/toaster';
+import { toast } from '@/utils/toast';
 
 interface DocumentUploadOfflineProps {
   equipmentId: string;

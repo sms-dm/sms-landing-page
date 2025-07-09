@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useBulkCreateEquipmentMutation } from '../services/equipmentApi';
 import { useGetVesselsNeedingOnboardingQuery } from '../services/managerApi';
 import { EquipmentType, EquipmentStatus, CriticalLevel } from '@/types';
-import { toast } from '@/components/ui/toaster';
+import { toast } from '@/utils/toast';
 import { Plus, Trash } from 'lucide-react';
 
 interface Props {

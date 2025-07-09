@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useOfflineData } from '@/hooks/useOfflineData';
 import { Equipment } from '@/types';
-import { toast } from '@/components/ui/toaster';
+import { toast } from '@/utils/toast';
 
 export function useEquipmentOffline(vesselId: string) {
   const queryClient = useQueryClient();

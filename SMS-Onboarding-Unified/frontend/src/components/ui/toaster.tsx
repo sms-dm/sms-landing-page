@@ -3,6 +3,9 @@ import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { removeToast } from '@/store/slices/uiSlice';
 import { cn } from '@/utils/cn';
 
+// Re-export toast from utils for compatibility
+export { toast } from '@/utils/toast';
+
 export function Toaster() {
   const toasts = useAppSelector((state) => state.ui.toasts);
   const dispatch = useAppDispatch();
