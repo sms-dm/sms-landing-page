@@ -38,7 +38,7 @@ PORT = "3006"
 [[services]]
 name = "onboarding-frontend"  
 buildCommand = "cd SMS-Onboarding-Unified && npm ci && npm run build"
-startCommand = "cd SMS-Onboarding-Unified && npm run start"
+startCommand = "cd SMS-Onboarding-Unified && npx serve -s dist -l ${PORT:-4173}"
 port = 4173
 healthcheckPath = "/"
 
