@@ -63,7 +63,7 @@ process.on('beforeExit', async () => {
 // Only add middleware if not in mock mode
 if (!useMockMode) {
   // Optional: Add middleware for soft deletes, audit logs, etc.
-  prisma.$use(async (params, next) => {
+  prisma.$use(async (params: any, next: any) => {
     // Soft delete middleware example
     if (params.model === 'Equipment' || params.model === 'SparePart') {
       if (params.action === 'delete') {
