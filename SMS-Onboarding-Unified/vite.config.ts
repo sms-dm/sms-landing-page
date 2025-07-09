@@ -88,13 +88,20 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
-    host: true,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    host: '0.0.0.0',
     open: true
   },
   preview: {
-    port: 4173,
-    host: true
+    port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
+    host: '0.0.0.0',
+    strictPort: false,
+    allowedHosts: [
+      '.railway.app',
+      '.up.railway.app',
+      'localhost',
+      '127.0.0.1'
+    ]
   },
   build: {
     outDir: 'dist',
