@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --open false",
-    "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173} --open false",
+    "start": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
