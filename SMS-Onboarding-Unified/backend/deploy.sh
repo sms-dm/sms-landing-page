@@ -22,10 +22,6 @@ npx prisma generate
 echo "Running migrations..."
 npx prisma migrate deploy
 
-# Compile TypeScript
-echo "Building TypeScript..."
-npx tsc
-
-# Start the server
+# Start the server with ts-node in transpile-only mode
 echo "Starting server..."
-node dist/server.js
+npx ts-node --transpile-only src/server.ts
