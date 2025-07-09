@@ -28,4 +28,4 @@ npx tsc
 
 # Start the server
 echo "Starting server..."
-npm start
+node dist/server.js
