@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "incremental": true,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@api/*": ["./api/*"],
+      "@services/*": ["./services/*"],
+      "@config/*": ["./config/*"],
+      "@types/*": ["./types/*"],
+      "@utils/*": ["./utils/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
+}

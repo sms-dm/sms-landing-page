@@ -1,0 +1,567 @@
+// SMS Onboarding Portal Prisma Schema
+// This schema supports multi-tenant isolation with Row Level Security
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [uuid_ossp(map: "uuid-ossp"), pgcrypto]
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  TECHNICIAN
+  HSE_OFFICER
+  VIEWER
+}
+
+enum EquipmentCriticality {
+  CRITICAL
+  IMPORTANT
+  STANDARD
+}
+
+enum EquipmentStatus {
+  PLANNED
+  ARRIVING
+  DRAFT
+  DOCUMENTED
+  PENDING_REVIEW
+  REVIEWED
+  VERIFIED
+  APPROVED
+  ACTIVE
+  REMOVED
+  REJECTED
+  DELETED
+}
+
+enum EquipmentClassification {
+  PERMANENT
+  FLOATING
+  RENTAL
+}
+
+enum DocumentType {
+  IMAGE
+  PDF
+  MANUAL
+  CERTIFICATE
+  OTHER
+}
+
+enum SyncStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  REVIEW
+  APPROVED
+  EXPORTED
+}
+
+enum QualityMetric {
+  COMPLETENESS
+  ACCURACY
+  PHOTO_QUALITY
+  DOCUMENTATION
+  COMPLIANCE
+}
+
+// Models
+model Company {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String   @db.VarChar(255)
+  code          String   @unique @db.VarChar(50)
+  address       String?
+  contactEmail  String?  @map("contact_email") @db.VarChar(255)
+  contactPhone  String?  @map("contact_phone") @db.VarChar(50)
+  timezone      String   @default("UTC") @db.VarChar(50)
+  settings      Json     @default("{}")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  users      User[]
+  vessels    Vessel[]
+  auditLogs  AuditLog[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("companies")
+}
+
+model User {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId    String    @map("company_id") @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(100)
+  lastName     String    @map("last_name") @db.VarChar(100)
+  role         UserRole  @default(VIEWER)
+  phone        String?   @db.VarChar(50)
+  avatarUrl    String?   @map("avatar_url")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz
+  settings     Json      @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  company                   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  documentedEquipment       Equipment[]            @relation("DocumentedBy")
+  reviewedEquipment         Equipment[]            @relation("ReviewedBy")
+  approvedEquipment         Equipment[]            @relation("ApprovedBy")
+  verifiedEquipment         Equipment[]            @relation("VerifiedBy")
+  uploadedDocuments         Document[]
+  verifiedCrossReferences   PartsCrossReference[]
+  evaluatedQualityScores    QualityScore[]
+  createdOnboardingTokens   OnboardingToken[]
+  offlineSyncQueue          OfflineSyncQueue[]
+  auditLogs                 AuditLog[]
+  notifications             Notification[]
+  equipmentTransfers        EquipmentTransfer[]
+  equipmentVerifications    EquipmentVerification[]
+  verificationNotifications VerificationNotification[]
+
+  @@index([companyId])
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Vessel {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  name          String   @db.VarChar(255)
+  imoNumber     String?  @unique @map("imo_number") @db.VarChar(20)
+  vesselType    String?  @map("vessel_type") @db.VarChar(100)
+  flag          String?  @db.VarChar(100)
+  grossTonnage  Decimal? @map("gross_tonnage") @db.Decimal(10, 2)
+  yearBuilt     Int?     @map("year_built")
+  classSociety  String?  @map("class_society") @db.VarChar(100)
+  onboardingStatus OnboardingStatus @default(NOT_STARTED) @map("onboarding_status")
+  metadata      Json     @default("{}")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  locations            Location[]
+  equipment            Equipment[]
+  partsCrossReferences PartsCrossReference[]
+  documents            Document[]
+  onboardingTokens     OnboardingToken[]
+  equipmentTransfersFrom EquipmentTransfer[] @relation("TransferFromVessel")
+  equipmentTransfersTo   EquipmentTransfer[] @relation("TransferToVessel")
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([imoNumber])
+  @@map("vessels")
+}
+
+model Location {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vesselId    String   @map("vessel_id") @db.Uuid
+  parentId    String?  @map("parent_id") @db.Uuid
+  name        String   @db.VarChar(255)
+  code        String?  @db.VarChar(50)
+  level       Int      @default(0)
+  path        String
+  description String?
+  metadata    Json     @default("{}")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  vessel     Vessel     @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  parent     Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Location[] @relation("LocationHierarchy")
+  equipment  Equipment[]
+  equipmentTransfersFrom EquipmentTransfer[] @relation("TransferFromLocation")
+  equipmentTransfersTo   EquipmentTransfer[] @relation("TransferToLocation")
+
+  @@unique([vesselId, code])
+  @@index([vesselId])
+  @@index([parentId])
+  @@index([path])
+  @@map("locations")
+}
+
+model Equipment {
+  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vesselId              String                  @map("vessel_id") @db.Uuid
+  locationId            String?                 @map("location_id") @db.Uuid
+  name                  String                  @db.VarChar(255)
+  code                  String?                 @db.VarChar(100)
+  equipmentType         String?                 @map("equipment_type") @db.VarChar(100)
+  manufacturer          String?                 @db.VarChar(255)
+  model                 String?                 @db.VarChar(255)
+  serialNumber          String?                 @map("serial_number") @db.VarChar(255)
+  criticality           EquipmentCriticality    @default(STANDARD)
+  status                EquipmentStatus         @default(DRAFT)
+  classification        EquipmentClassification @default(PERMANENT)
+  installationDate      DateTime?               @map("installation_date") @db.Date
+  warrantyExpiry        DateTime?               @map("warranty_expiry") @db.Date
+  specifications        Json                    @default("{}")
+  maintenanceIntervalDays Int?                  @map("maintenance_interval_days")
+  lastMaintenanceDate   DateTime?               @map("last_maintenance_date") @db.Date
+  nextMaintenanceDate   DateTime?               @map("next_maintenance_date") @db.Date
+  qualityScore          Int                     @default(0) @map("quality_score")
+  documentedBy          String?                 @map("documented_by") @db.Uuid
+  reviewedBy            String?                 @map("reviewed_by") @db.Uuid
+  approvedBy            String?                 @map("approved_by") @db.Uuid
+  documentedAt          DateTime?               @map("documented_at") @db.Timestamptz
+  reviewedAt            DateTime?               @map("reviewed_at") @db.Timestamptz
+  approvedAt            DateTime?               @map("approved_at") @db.Timestamptz
+  notes                 String?
+  metadata              Json                    @default("{}")
+  createdAt             DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+  
+  // Verification fields
+  verificationIntervalDays Int?                 @map("verification_interval_days")
+  lastVerifiedAt        DateTime?               @map("last_verified_at") @db.Timestamptz
+  nextVerificationDate  DateTime?               @map("next_verification_date") @db.Date
+  verifiedBy            String?                 @map("verified_by") @db.Uuid
+  verificationNotes     String?                 @map("verification_notes")
+  dataQualityDegradationRate Int?              @default(5) @map("data_quality_degradation_rate")
+
+  // Relations
+  vessel           Vessel               @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  location         Location?            @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  documentedByUser User?                @relation("DocumentedBy", fields: [documentedBy], references: [id], onDelete: SetNull)
+  reviewedByUser   User?                @relation("ReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  approvedByUser   User?                @relation("ApprovedBy", fields: [approvedBy], references: [id], onDelete: SetNull)
+  verifiedByUser   User?                @relation("VerifiedBy", fields: [verifiedBy], references: [id], onDelete: SetNull)
+  criticalParts    CriticalPart[]
+  documents        Document[]
+  qualityScores    QualityScore[]
+  transfers        EquipmentTransfer[]
+
+  @@index([vesselId])
+  @@index([locationId])
+  @@index([criticality])
+  @@index([status])
+  @@index([qualityScore])
+  @@index([code])
+  @@index([manufacturer])
+  @@index([nextVerificationDate])
+  @@index([lastVerifiedAt])
+  @@map("equipment")
+}
+
+model CriticalPart {
+  id             String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  equipmentId    String               @map("equipment_id") @db.Uuid
+  name           String               @db.VarChar(255)
+  partNumber     String?              @map("part_number") @db.VarChar(255)
+  manufacturer   String?              @db.VarChar(255)
+  description    String?
+  criticality    EquipmentCriticality @default(STANDARD)
+  quantity       Int                  @default(1)
+  unitOfMeasure  String?              @map("unit_of_measure") @db.VarChar(50)
+  minimumStock   Int                  @default(0) @map("minimum_stock")
+  currentStock   Int                  @default(0) @map("current_stock")
+  specifications Json                 @default("{}")
+  metadata       Json                 @default("{}")
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  equipment                Equipment[]           @relation
+  originalCrossReferences  PartsCrossReference[] @relation("OriginalPart")
+  compatibleCrossReferences PartsCrossReference[] @relation("CompatiblePart")
+  documents                Document[]
+
+  @@index([equipmentId])
+  @@index([partNumber])
+  @@index([manufacturer])
+  @@index([criticality])
+  @@map("critical_parts")
+}
+
+model PartsCrossReference {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vesselId           String    @map("vessel_id") @db.Uuid
+  originalPartId     String    @map("original_part_id") @db.Uuid
+  compatiblePartId   String    @map("compatible_part_id") @db.Uuid
+  compatibilityType  String?   @map("compatibility_type") @db.VarChar(50) // EXACT, COMPATIBLE, SUBSTITUTE
+  notes              String?
+  verifiedBy         String?   @map("verified_by") @db.Uuid
+  verifiedAt         DateTime? @map("verified_at") @db.Timestamptz
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  vessel           Vessel        @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  originalPart     CriticalPart  @relation("OriginalPart", fields: [originalPartId], references: [id], onDelete: Cascade)
+  compatiblePart   CriticalPart  @relation("CompatiblePart", fields: [compatiblePartId], references: [id], onDelete: Cascade)
+  verifiedByUser   User?         @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  @@unique([originalPartId, compatiblePartId])
+  @@index([vesselId])
+  @@index([originalPartId])
+  @@index([compatiblePartId])
+  @@map("parts_cross_reference")
+}
+
+model Document {
+  id            String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vesselId      String       @map("vessel_id") @db.Uuid
+  equipmentId   String?      @map("equipment_id") @db.Uuid
+  partId        String?      @map("part_id") @db.Uuid
+  documentType  DocumentType @map("document_type")
+  name          String       @db.VarChar(255)
+  description   String?
+  filePath      String       @map("file_path")
+  fileSize      BigInt?      @map("file_size")
+  mimeType      String?      @map("mime_type") @db.VarChar(100)
+  thumbnailPath String?      @map("thumbnail_path")
+  metadata      Json         @default("{}")
+  uploadedBy    String       @map("uploaded_by") @db.Uuid
+  uploadedAt    DateTime     @default(now()) @map("uploaded_at") @db.Timestamptz
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  vessel         Vessel        @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  equipment      Equipment?    @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  part           CriticalPart? @relation(fields: [partId], references: [id], onDelete: Cascade)
+  uploadedByUser User          @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([vesselId])
+  @@index([equipmentId])
+  @@index([partId])
+  @@index([documentType])
+  @@index([uploadedBy])
+  @@map("documents")
+}
+
+model QualityScore {
+  id          String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  equipmentId String        @map("equipment_id") @db.Uuid
+  metric      QualityMetric
+  score       Int
+  details     Json          @default("{}")
+  evaluatedBy String?       @map("evaluated_by") @db.Uuid
+  evaluatedAt DateTime      @default(now()) @map("evaluated_at") @db.Timestamptz
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  equipment        Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  evaluatedByUser  User?     @relation(fields: [evaluatedBy], references: [id], onDelete: SetNull)
+
+  @@index([equipmentId])
+  @@index([metric])
+  @@index([evaluatedAt])
+  @@map("quality_scores")
+}
+
+model OnboardingToken {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vesselId    String   @map("vessel_id") @db.Uuid
+  token       String   @unique @db.VarChar(255)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  maxUses     Int      @default(1) @map("max_uses")
+  currentUses Int      @default(0) @map("current_uses")
+  createdBy   String   @map("created_by") @db.Uuid
+  metadata    Json     @default("{}")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  vessel         Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  createdByUser  User   @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([vesselId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("onboarding_tokens")
+}
+
+model OfflineSyncQueue {
+  id              String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId          String     @map("user_id") @db.Uuid
+  deviceId        String     @map("device_id") @db.VarChar(255)
+  entityType      String     @map("entity_type") @db.VarChar(50)
+  entityId        String     @map("entity_id") @db.Uuid
+  operation       String     @db.VarChar(20) // CREATE, UPDATE, DELETE
+  data            Json
+  syncStatus      SyncStatus @default(PENDING) @map("sync_status")
+  syncAttempts    Int        @default(0) @map("sync_attempts")
+  lastSyncAttempt DateTime?  @map("last_sync_attempt") @db.Timestamptz
+  syncError       String?    @map("sync_error")
+  clientTimestamp DateTime   @map("client_timestamp") @db.Timestamptz
+  serverTimestamp DateTime?  @map("server_timestamp") @db.Timestamptz
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([syncStatus])
+  @@index([entityType, entityId])
+  @@map("offline_sync_queue")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String   @map("entity_id") @db.Uuid
+  action     String   @db.VarChar(50)
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address") @db.Inet
+  userAgent  String?  @map("user_agent")
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  type      String    @db.VarChar(50)
+  title     String    @db.VarChar(255)
+  message   String?
+  data      Json      @default("{}")
+  readAt    DateTime? @map("read_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model EquipmentTransfer {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  equipmentId       String    @map("equipment_id") @db.Uuid
+  fromVesselId      String    @map("from_vessel_id") @db.Uuid
+  toVesselId        String    @map("to_vessel_id") @db.Uuid
+  fromLocationId    String?   @map("from_location_id") @db.Uuid
+  toLocationId      String?   @map("to_location_id") @db.Uuid
+  transferredBy     String    @map("transferred_by") @db.Uuid
+  transferredAt     DateTime  @map("transferred_at") @db.Timestamptz
+  reason            String?
+  notes             String?
+  documentData      Json      @default("{}") @map("document_data") // Stores snapshot of documents at transfer time
+  partsData         Json      @default("{}") @map("parts_data") // Stores snapshot of parts at transfer time
+  qualityScoresData Json      @default("{}") @map("quality_scores_data") // Stores snapshot of quality scores
+  metadata          Json      @default("{}")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  equipment      Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  fromVessel     Vessel    @relation("TransferFromVessel", fields: [fromVesselId], references: [id], onDelete: Cascade)
+  toVessel       Vessel    @relation("TransferToVessel", fields: [toVesselId], references: [id], onDelete: Cascade)
+  fromLocation   Location? @relation("TransferFromLocation", fields: [fromLocationId], references: [id], onDelete: SetNull)
+  toLocation     Location? @relation("TransferToLocation", fields: [toLocationId], references: [id], onDelete: SetNull)
+  transferredByUser User   @relation(fields: [transferredBy], references: [id], onDelete: SetNull)
+
+  @@index([equipmentId])
+  @@index([fromVesselId])
+  @@index([toVesselId])
+  @@index([transferredAt])
+  @@map("equipment_transfers")
+}
+
+// View for parts intelligence (if supported by your Prisma version)
+view PartsIntelligence {
+  partId          String  @id @map("part_id") @db.Uuid
+  partNumber      String? @map("part_number")
+  partName        String  @map("part_name")
+  manufacturer    String?
+  criticality     EquipmentCriticality
+  vesselId        String  @map("vessel_id") @db.Uuid
+  vesselName      String  @map("vessel_name")
+  equipmentCount  Int     @map("equipment_count")
+  totalQuantity   Int     @map("total_quantity")
+  totalStock      Int     @map("total_stock")
+  equipmentTypes  String[] @map("equipment_types")
+  equipmentNames  String[] @map("equipment_names")
+
+  @@map("mv_parts_intelligence")
+}
+
+// Equipment verification history
+model EquipmentVerification {
+  id                    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  equipmentId           String    @map("equipment_id") @db.Uuid
+  verifiedBy            String    @map("verified_by") @db.Uuid
+  verificationDate      DateTime  @default(now()) @map("verification_date") @db.Timestamptz
+  verificationType      String    @map("verification_type") @db.VarChar(50) // SCHEDULED, MANUAL, CORRECTIVE
+  qualityScoreBefore    Int       @map("quality_score_before")
+  qualityScoreAfter     Int       @map("quality_score_after")
+  findings              String?
+  correctiveActions     String?   @map("corrective_actions")
+  nextVerificationDate  DateTime? @map("next_verification_date") @db.Date
+  metadata              Json      @default("{}")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  equipment      Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  verifiedByUser User      @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  @@index([equipmentId])
+  @@index([verificationDate])
+  @@index([verifiedBy])
+  @@map("equipment_verifications")
+}
+
+// Verification notifications
+model VerificationNotification {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  equipmentId       String    @map("equipment_id") @db.Uuid
+  notificationType  String    @map("notification_type") @db.VarChar(50) // DUE_SOON, OVERDUE, CRITICAL_OVERDUE
+  daysUntilDue      Int?      @map("days_until_due")
+  sentTo            String    @map("sent_to") @db.Uuid
+  sentAt            DateTime  @default(now()) @map("sent_at") @db.Timestamptz
+  acknowledgedAt    DateTime? @map("acknowledged_at") @db.Timestamptz
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  sentToUser User     @relation(fields: [sentTo], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([sentTo])
+  @@index([acknowledgedAt])
+  @@map("verification_notifications")
+}

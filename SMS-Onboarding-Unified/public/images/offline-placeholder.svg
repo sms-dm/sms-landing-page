@@ -1,0 +1,9 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f3f4f6"/>
+  <g transform="translate(200, 150)">
+    <rect x="-40" y="-40" width="80" height="80" fill="#e5e7eb" rx="8"/>
+    <path d="M -20 -10 L -10 0 L 10 -20 L 20 -10 L 20 20 L -20 20 Z" fill="#9ca3af"/>
+    <circle cx="10" cy="-10" r="5" fill="#9ca3af"/>
+  </g>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Image unavailable offline</text>
+</svg>

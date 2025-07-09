@@ -1,0 +1,379 @@
+// SMS Onboarding Portal Prisma Schema - Development (SQLite)
+// This schema is for local development using SQLite
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client-dev"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums (SQLite doesn't support enums, so we use String with @db.Text)
+model Company {
+  id            String   @id @default(uuid())
+  name          String
+  code          String   @unique
+  address       String?
+  contactEmail  String?  @map("contact_email")
+  contactPhone  String?  @map("contact_phone")
+  timezone      String   @default("UTC")
+  settings      String   @default("{}")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users      User[]
+  vessels    Vessel[]
+  auditLogs  AuditLog[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("companies")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  companyId    String    @map("company_id")
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  role         String    @default("VIEWER") // UserRole enum as string
+  phone        String?
+  avatarUrl    String?   @map("avatar_url")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  settings     String    @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  company                   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  documentedEquipment       Equipment[]            @relation("DocumentedBy")
+  reviewedEquipment         Equipment[]            @relation("ReviewedBy")
+  approvedEquipment         Equipment[]            @relation("ApprovedBy")
+  uploadedDocuments         Document[]
+  verifiedCrossReferences   PartsCrossReference[]
+  evaluatedQualityScores    QualityScore[]
+  createdOnboardingTokens   OnboardingToken[]
+  offlineSyncQueue          OfflineSyncQueue[]
+  auditLogs                 AuditLog[]
+  notifications             Notification[]
+
+  @@index([companyId])
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Vessel {
+  id            String   @id @default(uuid())
+  companyId     String   @map("company_id")
+  name          String
+  imoNumber     String?  @unique @map("imo_number")
+  vesselType    String?  @map("vessel_type")
+  flag          String?
+  grossTonnage  Float?   @map("gross_tonnage")
+  yearBuilt     Int?     @map("year_built")
+  classSociety  String?  @map("class_society")
+  metadata      String   @default("{}")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  locations            Location[]
+  equipment            Equipment[]
+  partsCrossReferences PartsCrossReference[]
+  documents            Document[]
+  onboardingTokens     OnboardingToken[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([imoNumber])
+  @@map("vessels")
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  vesselId    String   @map("vessel_id")
+  parentId    String?  @map("parent_id")
+  name        String
+  code        String?
+  level       Int      @default(0)
+  path        String
+  description String?
+  metadata    String   @default("{}")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  vessel     Vessel     @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  parent     Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Location[] @relation("LocationHierarchy")
+  equipment  Equipment[]
+
+  @@unique([vesselId, code])
+  @@index([vesselId])
+  @@index([parentId])
+  @@index([path])
+  @@map("locations")
+}
+
+model Equipment {
+  id                    String    @id @default(uuid())
+  vesselId              String    @map("vessel_id")
+  locationId            String?   @map("location_id")
+  name                  String
+  code                  String?
+  equipmentType         String?   @map("equipment_type")
+  manufacturer          String?
+  model                 String?
+  serialNumber          String?   @map("serial_number")
+  criticality           String    @default("STANDARD") // EquipmentCriticality enum as string
+  status                String    @default("DRAFT") // EquipmentStatus enum as string
+  installationDate      DateTime? @map("installation_date")
+  warrantyExpiry        DateTime? @map("warranty_expiry")
+  specifications        String    @default("{}")
+  maintenanceIntervalDays Int?    @map("maintenance_interval_days")
+  lastMaintenanceDate   DateTime? @map("last_maintenance_date")
+  nextMaintenanceDate   DateTime? @map("next_maintenance_date")
+  qualityScore          Int       @default(0) @map("quality_score")
+  documentedBy          String?   @map("documented_by")
+  reviewedBy            String?   @map("reviewed_by")
+  approvedBy            String?   @map("approved_by")
+  documentedAt          DateTime? @map("documented_at")
+  reviewedAt            DateTime? @map("reviewed_at")
+  approvedAt            DateTime? @map("approved_at")
+  notes                 String?
+  metadata              String    @default("{}")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  vessel           Vessel          @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  location         Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  documentedByUser User?           @relation("DocumentedBy", fields: [documentedBy], references: [id], onDelete: SetNull)
+  reviewedByUser   User?           @relation("ReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  approvedByUser   User?           @relation("ApprovedBy", fields: [approvedBy], references: [id], onDelete: SetNull)
+  criticalParts    CriticalPart[]
+  documents        Document[]
+  qualityScores    QualityScore[]
+
+  @@index([vesselId])
+  @@index([locationId])
+  @@index([criticality])
+  @@index([status])
+  @@index([qualityScore])
+  @@index([code])
+  @@index([manufacturer])
+  @@map("equipment")
+}
+
+model CriticalPart {
+  id             String     @id @default(uuid())
+  equipmentId    String     @map("equipment_id")
+  name           String
+  partNumber     String?    @map("part_number")
+  manufacturer   String?
+  description    String?
+  criticality    String     @default("STANDARD") // EquipmentCriticality enum as string
+  quantity       Int        @default(1)
+  unitOfMeasure  String?    @map("unit_of_measure")
+  minimumStock   Int        @default(0) @map("minimum_stock")
+  currentStock   Int        @default(0) @map("current_stock")
+  specifications String     @default("{}")
+  metadata       String     @default("{}")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  equipment                Equipment[]           @relation
+  originalCrossReferences  PartsCrossReference[] @relation("OriginalPart")
+  compatibleCrossReferences PartsCrossReference[] @relation("CompatiblePart")
+  documents                Document[]
+
+  @@index([equipmentId])
+  @@index([partNumber])
+  @@index([manufacturer])
+  @@index([criticality])
+  @@map("critical_parts")
+}
+
+model PartsCrossReference {
+  id                 String    @id @default(uuid())
+  vesselId           String    @map("vessel_id")
+  originalPartId     String    @map("original_part_id")
+  compatiblePartId   String    @map("compatible_part_id")
+  compatibilityType  String?   @map("compatibility_type") // EXACT, COMPATIBLE, SUBSTITUTE
+  notes              String?
+  verifiedBy         String?   @map("verified_by")
+  verifiedAt         DateTime? @map("verified_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  vessel           Vessel        @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  originalPart     CriticalPart  @relation("OriginalPart", fields: [originalPartId], references: [id], onDelete: Cascade)
+  compatiblePart   CriticalPart  @relation("CompatiblePart", fields: [compatiblePartId], references: [id], onDelete: Cascade)
+  verifiedByUser   User?         @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  @@unique([originalPartId, compatiblePartId])
+  @@index([vesselId])
+  @@index([originalPartId])
+  @@index([compatiblePartId])
+  @@map("parts_cross_reference")
+}
+
+model Document {
+  id            String    @id @default(uuid())
+  vesselId      String    @map("vessel_id")
+  equipmentId   String?   @map("equipment_id")
+  partId        String?   @map("part_id")
+  documentType  String    @map("document_type") // DocumentType enum as string
+  name          String
+  description   String?
+  filePath      String    @map("file_path")
+  fileSize      BigInt?   @map("file_size")
+  mimeType      String?   @map("mime_type")
+  thumbnailPath String?   @map("thumbnail_path")
+  metadata      String    @default("{}")
+  uploadedBy    String    @map("uploaded_by")
+  uploadedAt    DateTime  @default(now()) @map("uploaded_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  vessel         Vessel        @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  equipment      Equipment?    @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  part           CriticalPart? @relation(fields: [partId], references: [id], onDelete: Cascade)
+  uploadedByUser User          @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([vesselId])
+  @@index([equipmentId])
+  @@index([partId])
+  @@index([documentType])
+  @@index([uploadedBy])
+  @@map("documents")
+}
+
+model QualityScore {
+  id          String    @id @default(uuid())
+  equipmentId String    @map("equipment_id")
+  metric      String    // QualityMetric enum as string
+  score       Int
+  details     String    @default("{}")
+  evaluatedBy String?   @map("evaluated_by")
+  evaluatedAt DateTime  @default(now()) @map("evaluated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  equipment        Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  evaluatedByUser  User?     @relation(fields: [evaluatedBy], references: [id], onDelete: SetNull)
+
+  @@index([equipmentId])
+  @@index([metric])
+  @@index([evaluatedAt])
+  @@map("quality_scores")
+}
+
+model OnboardingToken {
+  id          String   @id @default(uuid())
+  vesselId    String   @map("vessel_id")
+  token       String   @unique
+  expiresAt   DateTime @map("expires_at")
+  maxUses     Int      @default(1) @map("max_uses")
+  currentUses Int      @default(0) @map("current_uses")
+  createdBy   String   @map("created_by")
+  metadata    String   @default("{}")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  vessel         Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  createdByUser  User   @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([vesselId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("onboarding_tokens")
+}
+
+model OfflineSyncQueue {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  deviceId        String    @map("device_id")
+  entityType      String    @map("entity_type")
+  entityId        String    @map("entity_id")
+  operation       String    // CREATE, UPDATE, DELETE
+  data            String
+  syncStatus      String    @default("PENDING") @map("sync_status") // SyncStatus enum as string
+  syncAttempts    Int       @default(0) @map("sync_attempts")
+  lastSyncAttempt DateTime? @map("last_sync_attempt")
+  syncError       String?   @map("sync_error")
+  clientTimestamp DateTime  @map("client_timestamp")
+  serverTimestamp DateTime? @map("server_timestamp")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([syncStatus])
+  @@index([entityType, entityId])
+  @@map("offline_sync_queue")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  companyId  String   @map("company_id")
+  userId     String?  @map("user_id")
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  action     String
+  oldValues  String?  @map("old_values")
+  newValues  String?  @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  message   String?
+  data      String    @default("{}")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
