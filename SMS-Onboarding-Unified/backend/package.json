@@ -26,6 +26,9 @@
     "db:generate:prod": "prisma generate --schema=../prisma/schema.prisma",
     "db:validate": "prisma validate --schema=../prisma/schema.prisma && prisma validate --schema=../prisma/schema.dev.prisma"
   },
+  "prisma": {
+    "schema": "../prisma/schema.prisma"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",
     "@aws-sdk/s3-request-presigner": "^3.842.0",
