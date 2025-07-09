@@ -155,8 +155,8 @@ async function startServer() {
     const dbConnected = await checkDatabaseConnection();
     
     if (!dbConnected) {
-      logger.error('Failed to connect to database. Server startup aborted.');
-      process.exit(1);
+      logger.warn('Database connection failed. Running in mock mode.');
+      // Don't exit - allow mock mode
     }
     
     // Perform initial health check
