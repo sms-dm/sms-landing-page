@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../../services/logger.service';
 import { exportService } from '../../services/export.service';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../services/prisma';
 
 interface MaintenancePortalData {
   vessel: any;

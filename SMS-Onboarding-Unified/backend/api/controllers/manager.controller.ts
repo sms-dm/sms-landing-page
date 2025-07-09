@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+// PrismaClient import removed
 import logger from '../../services/logger.service';
 
-const prisma = new PrismaClient();
+import { prisma } from '../../services/prisma';
 
 // Get vessels ready for approval
 export async function getVesselsForApproval(req: Request, res: Response) {

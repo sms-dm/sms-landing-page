@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaClient } from '@prisma/client';
 import { EquipmentClassification } from '../../types/entities';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../services/prisma';
 
 export const listEquipmentByVessel = async (req: Request, res: Response) => {
   try {

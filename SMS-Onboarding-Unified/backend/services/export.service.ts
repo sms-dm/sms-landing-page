@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+// PrismaClient import removed
 import archiver from 'archiver';
 import fs from 'fs/promises';
 import path from 'path';
@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import logger from './logger.service';
 import { s3Service } from './s3.service';
 
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 interface ExportOptions {
   vesselId: string;
