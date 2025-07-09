@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import cron from 'node-cron';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 export class ScheduledTasksService {
   private tasks: cron.ScheduledTask[] = [];
