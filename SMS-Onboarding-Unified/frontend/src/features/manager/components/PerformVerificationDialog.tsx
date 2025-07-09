@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { verificationService, EquipmentDue } from '@/services/verification';
-import { useToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface PerformVerificationDialogProps {
   equipment: EquipmentDue;
@@ -19,7 +19,6 @@ export const PerformVerificationDialog: React.FC<PerformVerificationDialogProps>
   onClose,
   onSuccess,
 }) => {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [verificationType, setVerificationType] = useState<'SCHEDULED' | 'MANUAL' | 'CORRECTIVE'>('SCHEDULED');
   const [qualityScore, setQualityScore] = useState(equipment.qualityScore);

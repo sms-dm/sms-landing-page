@@ -3,11 +3,10 @@ import { Bell, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { verificationService, VerificationNotification } from '@/services/verification';
-import { useToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 import { format } from 'date-fns';
 
 export const VerificationNotifications: React.FC = () => {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<VerificationNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

@@ -8,11 +8,10 @@ import {
   VerificationNotifications 
 } from '../components';
 import { verificationService, EquipmentDue, VerificationHistory } from '@/services/verification';
-import { useToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 import { format } from 'date-fns';
 
 export const VerificationManagementPage: React.FC = () => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'history'>('dashboard');
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentDue | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);

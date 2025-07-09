@@ -10,9 +10,9 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress-indicator';
+import { ProgressIndicator } from '@/components/ui/progress-indicator';
 import { verificationService, VerificationDashboardStats, EquipmentDue } from '@/services/verification';
-import { useToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 import { format } from 'date-fns';
 
 interface VerificationDashboardProps {
@@ -24,7 +24,6 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
   vesselId,
   onVerifyEquipment,
 }) => {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<VerificationDashboardStats | null>(null);
   const [overdueEquipment, setOverdueEquipment] = useState<EquipmentDue[]>([]);
@@ -157,7 +156,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
         <h3 className="text-lg font-semibold mb-4">Average Data Quality Score</h3>
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <Progress value={stats.averageQualityScore} className="h-4" />
+            <ProgressIndicator value={stats.averageQualityScore} size="md" showPercentage={false} />
           </div>
           <span className={`text-2xl font-bold ${getQualityColor(stats.averageQualityScore)}`}>
             {stats.averageQualityScore}%

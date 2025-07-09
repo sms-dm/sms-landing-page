@@ -37,7 +37,7 @@ PORT = "3006"
 # Onboarding Frontend Service
 [[services]]
 name = "onboarding-frontend"  
-buildCommand = "cd SMS-Onboarding-Unified && npm install && npm run build"
+buildCommand = "cd SMS-Onboarding-Unified && npm ci && npm run build"
 startCommand = "cd SMS-Onboarding-Unified && npm run preview"
 port = 4173
 healthcheckPath = "/"

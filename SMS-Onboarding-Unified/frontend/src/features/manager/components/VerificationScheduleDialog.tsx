@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { verificationService } from '@/services/verification';
-import { useToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface VerificationScheduleDialogProps {
   equipment: {
@@ -24,7 +24,6 @@ export const VerificationScheduleDialog: React.FC<VerificationScheduleDialogProp
   onClose,
   onSuccess,
 }) => {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [intervalDays, setIntervalDays] = useState(
     equipment.verificationIntervalDays || 90
