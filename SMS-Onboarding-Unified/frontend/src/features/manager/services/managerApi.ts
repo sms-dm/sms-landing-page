@@ -133,3 +133,17 @@ export const managerApi = {
     return response.data;
   },
 };
+
+// Mock hook for team members query (for build compatibility)
+export const useGetTeamMembersQuery = () => {
+  return {
+    data: {
+      teamMembers: [
+        { id: '1', name: 'John Doe', role: 'technician', status: 'active' },
+        { id: '2', name: 'Jane Smith', role: 'engineer', status: 'active' }
+      ]
+    },
+    isLoading: false,
+    error: null
+  };
+};
