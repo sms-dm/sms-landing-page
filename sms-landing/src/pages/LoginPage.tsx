@@ -25,7 +25,8 @@ const LoginPage: React.FC = () => {
       if (maintenanceResponse.data.token) {
         localStorage.setItem('token', maintenanceResponse.data.token);
         localStorage.setItem('user', JSON.stringify(maintenanceResponse.data.user));
-        window.location.href = 'http://localhost:3000/dashboard';
+        // Redirect to portal access page instead of directly to dashboards
+        window.location.href = '/portals';
         return;
       }
     } catch (maintenanceError) {
@@ -36,7 +37,8 @@ const LoginPage: React.FC = () => {
         if (onboardingResponse.data.token) {
           localStorage.setItem('token', onboardingResponse.data.token);
           localStorage.setItem('user', JSON.stringify(onboardingResponse.data.user));
-          window.location.href = 'http://localhost:3001/dashboard';
+          // Redirect to portal access page instead of directly to dashboards
+          window.location.href = '/portals';
           return;
         }
       } catch (onboardingError) {

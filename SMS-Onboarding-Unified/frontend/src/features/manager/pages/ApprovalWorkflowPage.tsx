@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/useToast';
 import { managerApi } from '../services/managerApi';
 import { CheckCircle2, XCircle, FileCheck, Package, Eye, Download, Send } from 'lucide-react';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
+import { portalService } from '@/services/portalService';
 
 interface VesselApproval {
   id: string;
@@ -86,6 +87,9 @@ export default function ApprovalWorkflowPage() {
         includePhotos: true,
         format: 'json',
       });
+
+      // Update onboarding status to complete
+      await portalService.completeOnboarding(selectedVessel);
 
       // Set export result and show success modal
       setExportResult({

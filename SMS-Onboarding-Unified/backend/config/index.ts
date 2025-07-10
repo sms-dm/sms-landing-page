@@ -93,4 +93,10 @@ export const config = {
       'text/csv',
     ],
   },
+  
+  integration: {
+    webhookSecret: process.env.WEBHOOK_SECRET || 'your-webhook-secret-change-in-production',
+    maintenanceApiUrl: process.env.MAINTENANCE_API_URL || 'http://localhost:3001',
+    maintenanceApiKey: process.env.MAINTENANCE_API_KEY || 'your-maintenance-api-key',
+  },
 };

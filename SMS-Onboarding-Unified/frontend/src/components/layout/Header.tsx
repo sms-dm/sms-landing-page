@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, Settings, User } from 'lucide-react';
+import { Bell, Menu, Search, Settings, User, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +10,8 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -17,6 +19,43 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
+  const [hasMaintenanceAccess, setHasMaintenanceAccess] = useState(false);
+
+  useEffect(() => {
+    checkMaintenanceAccess();
+  }, []);
+
+  const checkMaintenanceAccess = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const response = await axios.get('/api/vessels/status', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const vessels = response.data;
+        const completedVessel = vessels.find((v: any) => 
+          v.onboardingStatus === 'APPROVED' || v.onboardingStatus === 'EXPORTED'
+        );
+        
+        setHasMaintenanceAccess(!!completedVessel);
+      }
+    } catch (error) {
+      console.error('Error checking maintenance access:', error);
+    }
+  };
+
+  const handlePortalSwitch = () => {
+    if (hasMaintenanceAccess) {
+      // Store current portal info
+      localStorage.setItem('currentPortal', 'onboarding');
+      // Redirect to maintenance portal
+      window.location.href = 'http://localhost:3000/dashboard';
+    } else {
+      // Redirect to portal selection page
+      window.location.href = 'http://localhost:3002/portals';
+    }
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 lg:px-6">
@@ -54,6 +93,19 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         {/* Right section */}
         <div className="flex items-center gap-3">
+          {/* Portal Switcher */}
+          {hasMaintenanceAccess && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handlePortalSwitch}
+              className="hidden sm:flex items-center gap-2"
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+              <span>Maintenance Portal</span>
+            </Button>
+          )}
+
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />

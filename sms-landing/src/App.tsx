@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import ActivationHelpPage from './pages/ActivationHelpPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import WarpTransition from './pages/WarpTransition';
+import PortalAccessPage from './pages/PortalAccessPage';
 import NeuralBackground from './components/NeuralBackground';
 import { useEffect, useState } from 'react';
 
@@ -64,6 +65,9 @@ function App() {
             <ActivationHelpPage />
           </div>
         } />
+        
+        {/* Portal Access Page - for authenticated users */}
+        <Route path="/portals" element={<PortalAccessPage />} />
       </Routes>
     </Router>
   );

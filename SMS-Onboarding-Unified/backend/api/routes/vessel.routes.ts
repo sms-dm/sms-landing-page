@@ -35,6 +35,13 @@ router.get(
   vesselController.listVessels
 );
 
+// GET /vessels/status - Quick status check for portal switching
+router.get(
+  '/status',
+  authenticate,
+  vesselController.getVesselStatus
+);
+
 // POST /vessels
 router.post(
   '/',
@@ -107,6 +114,19 @@ router.get(
   [param('vesselId').isUUID()],
   validateRequest,
   vesselController.getOnboardingProgress
+);
+
+// PATCH /vessels/:vesselId/onboarding-status
+router.patch(
+  '/:vesselId/onboarding-status',
+  authenticate,
+  authorize([UserRole.ADMIN, UserRole.MANAGER]),
+  [
+    param('vesselId').isUUID(),
+    body('status').isIn(Object.values(OnboardingStatus))
+  ],
+  validateRequest,
+  vesselController.updateOnboardingStatus
 );
 
 // GET /vessels/:vesselId/equipment

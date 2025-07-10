@@ -237,3 +237,66 @@ export const getOnboardingProgress = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error fetching onboarding progress' });
   }
 };
+
+export const getVesselStatus = async (req: Request, res: Response) => {
+  try {
+    // Get vessels for the authenticated user's company
+    const userId = (req as any).user?.id;
+    const userCompanyId = (req as any).user?.companyId;
+    
+    // Filter vessels by company
+    let vesselList = Array.from(vessels.values()).filter(v => 
+      v.companyId === userCompanyId
+    );
+    
+    // Return simplified status information
+    const statusList = vesselList.map(vessel => ({
+      id: vessel.id,
+      name: vessel.name,
+      onboardingStatus: vessel.onboardingStatus || 'NOT_STARTED',
+      isActive: vessel.isActive !== false
+    }));
+    
+    res.json(statusList);
+  } catch (error) {
+    console.error('Error fetching vessel status:', error);
+    res.status(500).json({ message: 'Error fetching vessel status' });
+  }
+};
+
+export const updateOnboardingStatus = async (req: Request, res: Response) => {
+  try {
+    const { vesselId } = req.params;
+    const { status } = req.body;
+    
+    const vessel = vessels.get(vesselId);
+    if (!vessel) {
+      return res.status(404).json({ message: 'Vessel not found' });
+    }
+    
+    // Update the onboarding status
+    vessel.onboardingStatus = status;
+    vessel.updatedAt = new Date();
+    
+    // If status is APPROVED or EXPORTED, mark as complete
+    if (status === 'APPROVED' || status === 'EXPORTED') {
+      vessel.onboardingComplete = true;
+      vessel.onboardingCompletedAt = new Date();
+    }
+    
+    vessels.set(vesselId, vessel);
+    
+    res.json({ 
+      message: 'Onboarding status updated successfully',
+      vessel: {
+        id: vessel.id,
+        name: vessel.name,
+        onboardingStatus: vessel.onboardingStatus,
+        onboardingComplete: vessel.onboardingComplete
+      }
+    });
+  } catch (error) {
+    console.error('Error updating onboarding status:', error);
+    res.status(500).json({ message: 'Error updating onboarding status' });
+  }
+};

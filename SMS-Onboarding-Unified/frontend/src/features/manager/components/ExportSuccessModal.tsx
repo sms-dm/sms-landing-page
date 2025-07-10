@@ -60,19 +60,24 @@ export function ExportSuccessModal({ isOpen, onClose, exportData }: ExportSucces
           </div>
 
           <div className="flex gap-3 w-full">
-            {exportData.maintenancePortalUrl && (
-              <Button
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-                onClick={() => window.open(exportData.maintenancePortalUrl, '_blank')}
-              >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                View in Maintenance Portal
-              </Button>
-            )}
+            <Button
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                // Navigate to maintenance portal
+                window.location.href = exportData.maintenancePortalUrl || 'http://localhost:3000/dashboard';
+              }}
+            >
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Access Maintenance Portal
+            </Button>
             <Button variant="outline" onClick={onClose} className="flex-1">
               Close
             </Button>
           </div>
+          
+          <p className="text-xs text-gray-500 mt-4">
+            You can now switch between portals seamlessly with your current credentials
+          </p>
         </div>
       </div>
     </div>
