@@ -1,0 +1,20 @@
+{
+  "short_name": "SMS",
+  "name": "Smart Maintenance System",
+  "icons": [
+    {
+      "src": "sms-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "sms-logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#00CED1",
+  "background_color": "#0F172A"
+}

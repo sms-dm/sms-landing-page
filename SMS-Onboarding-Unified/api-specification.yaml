@@ -1,0 +1,2899 @@
+openapi: 3.0.3
+info:
+  title: SMS Onboarding Portal API
+  description: |
+    RESTful API for the SMS Onboarding Portal that manages vessel onboarding, equipment documentation,
+    critical parts management, and integration with the maintenance portal.
+  version: 1.0.0
+  contact:
+    name: SMS Support Team
+    email: support@sms-portal.com
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://api.sms-onboarding.com/v1
+    description: Production server
+  - url: https://staging-api.sms-onboarding.com/v1
+    description: Staging server
+  - url: http://localhost:4000/v1
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Companies
+    description: Company management endpoints
+  - name: Vessels
+    description: Vessel management and onboarding endpoints
+  - name: Equipment
+    description: Equipment documentation and management
+  - name: Parts
+    description: Critical parts and inventory management
+  - name: Files
+    description: File upload and management endpoints
+  - name: Tokens
+    description: Onboarding token management
+  - name: Integration
+    description: Maintenance portal integration endpoints
+  - name: Sync
+    description: Offline synchronization endpoints
+  - name: Export
+    description: Data export endpoints
+  - name: Webhooks
+    description: Webhook endpoints for external integrations
+  - name: Analytics
+    description: Progress tracking and quality scoring
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password with token
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    patch:
+      tags:
+        - Authentication
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Company Management
+  /companies:
+    get:
+      tags:
+        - Companies
+      summary: List companies
+      operationId: listCompanies
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/SortQuery'
+      responses:
+        '200':
+          description: Companies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Companies
+      summary: Create a new company
+      operationId: createCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '201':
+          description: Company created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /companies/{companyId}:
+    get:
+      tags:
+        - Companies
+      summary: Get company by ID
+      operationId: getCompany
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      responses:
+        '200':
+          description: Company retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Companies
+      summary: Update company
+      operationId: updateCompany
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: Company updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Companies
+      summary: Delete company
+      operationId: deleteCompany
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      responses:
+        '204':
+          description: Company deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Vessel Management
+  /vessels:
+    get:
+      tags:
+        - Vessels
+      summary: List vessels
+      operationId: listVessels
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/SortQuery'
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/VesselStatus'
+        - name: onboardingStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/OnboardingStatus'
+      responses:
+        '200':
+          description: Vessels retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VesselListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Vessels
+      summary: Create a new vessel
+      operationId: createVessel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVesselRequest'
+      responses:
+        '201':
+          description: Vessel created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /vessels/{vesselId}:
+    get:
+      tags:
+        - Vessels
+      summary: Get vessel by ID
+      operationId: getVessel
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+      responses:
+        '200':
+          description: Vessel retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Vessels
+      summary: Update vessel
+      operationId: updateVessel
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVesselRequest'
+      responses:
+        '200':
+          description: Vessel updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Vessels
+      summary: Delete vessel
+      operationId: deleteVessel
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+      responses:
+        '204':
+          description: Vessel deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /vessels/{vesselId}/onboarding-progress:
+    get:
+      tags:
+        - Vessels
+        - Analytics
+      summary: Get vessel onboarding progress
+      operationId: getVesselOnboardingProgress
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+      responses:
+        '200':
+          description: Onboarding progress retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Equipment Management
+  /vessels/{vesselId}/equipment:
+    get:
+      tags:
+        - Equipment
+      summary: List equipment for a vessel
+      operationId: listEquipment
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/SortQuery'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EquipmentType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/EquipmentStatus'
+        - name: criticalLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/CriticalLevel'
+        - name: location
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Equipment list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Equipment
+      summary: Create new equipment
+      operationId: createEquipment
+      parameters:
+        - $ref: '#/components/parameters/VesselId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '201':
+          description: Equipment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /equipment/{equipmentId}:
+    get:
+      tags:
+        - Equipment
+      summary: Get equipment by ID
+      operationId: getEquipment
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      responses:
+        '200':
+          description: Equipment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Equipment
+      summary: Update equipment
+      operationId: updateEquipment
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEquipmentRequest'
+      responses:
+        '200':
+          description: Equipment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Equipment
+      summary: Delete equipment
+      operationId: deleteEquipment
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      responses:
+        '204':
+          description: Equipment deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /equipment/{equipmentId}/verify:
+    post:
+      tags:
+        - Equipment
+      summary: Verify equipment (Manager role)
+      operationId: verifyEquipment
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - qualityScore
+              properties:
+                qualityScore:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Equipment verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Parts Management
+  /equipment/{equipmentId}/parts:
+    get:
+      tags:
+        - Parts
+      summary: List parts for equipment
+      operationId: listParts
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/SearchQuery'
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/PartCategory'
+        - name: criticalLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/CriticalLevel'
+        - name: lowStock
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Parts list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Parts
+      summary: Create new part
+      operationId: createPart
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePartRequest'
+      responses:
+        '201':
+          description: Part created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /parts/{partId}:
+    get:
+      tags:
+        - Parts
+      summary: Get part by ID
+      operationId: getPart
+      parameters:
+        - $ref: '#/components/parameters/PartId'
+      responses:
+        '200':
+          description: Part retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Parts
+      summary: Update part
+      operationId: updatePart
+      parameters:
+        - $ref: '#/components/parameters/PartId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePartRequest'
+      responses:
+        '200':
+          description: Part updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Parts
+      summary: Delete part
+      operationId: deletePart
+      parameters:
+        - $ref: '#/components/parameters/PartId'
+      responses:
+        '204':
+          description: Part deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /parts/cross-reference:
+    post:
+      tags:
+        - Parts
+      summary: Find cross-reference parts
+      operationId: crossReferenceParts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - partNumber
+              properties:
+                partNumber:
+                  type: string
+                manufacturer:
+                  type: string
+                vesselId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Cross-reference parts found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  originalPart:
+                    $ref: '#/components/schemas/Part'
+                  alternatives:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CrossReferencePart'
+                  usageAcrossVessels:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        vesselId:
+                          type: string
+                          format: uuid
+                        vesselName:
+                          type: string
+                        equipmentCount:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # File Management
+  /files/upload:
+    post:
+      tags:
+        - Files
+      summary: Upload file to S3
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - type
+                - entityType
+                - entityId
+              properties:
+                file:
+                  type: string
+                  format: binary
+                type:
+                  type: string
+                  enum: [photo, document, logo]
+                entityType:
+                  type: string
+                  enum: [company, vessel, equipment, part]
+                entityId:
+                  type: string
+                  format: uuid
+                description:
+                  type: string
+      responses:
+        '201':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUpload'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /files/batch-upload:
+    post:
+      tags:
+        - Files
+      summary: Batch upload multiple files
+      operationId: batchUploadFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - files
+                - metadata
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                metadata:
+                  type: string
+                  description: JSON string containing metadata for each file
+      responses:
+        '201':
+          description: Files uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploaded:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FileUpload'
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filename:
+                          type: string
+                        error:
+                          type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /files/{fileId}:
+    get:
+      tags:
+        - Files
+      summary: Get file metadata
+      operationId: getFile
+      parameters:
+        - $ref: '#/components/parameters/FileId'
+      responses:
+        '200':
+          description: File metadata retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUpload'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Files
+      summary: Delete file
+      operationId: deleteFile
+      parameters:
+        - $ref: '#/components/parameters/FileId'
+      responses:
+        '204':
+          description: File deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /files/{fileId}/download:
+    get:
+      tags:
+        - Files
+      summary: Get presigned download URL
+      operationId: getFileDownloadUrl
+      parameters:
+        - $ref: '#/components/parameters/FileId'
+        - name: expiresIn
+          in: query
+          schema:
+            type: integer
+            default: 3600
+            description: URL expiration time in seconds
+      responses:
+        '200':
+          description: Download URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Token Management
+  /tokens:
+    get:
+      tags:
+        - Tokens
+      summary: List onboarding tokens
+      operationId: listTokens
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+        - name: vesselId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/TokenStatus'
+      responses:
+        '200':
+          description: Tokens retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Tokens
+      summary: Generate onboarding token
+      operationId: generateToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTokenRequest'
+      responses:
+        '201':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingToken'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tokens/{tokenId}:
+    get:
+      tags:
+        - Tokens
+      summary: Get token details
+      operationId: getToken
+      parameters:
+        - $ref: '#/components/parameters/TokenId'
+      responses:
+        '200':
+          description: Token retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingToken'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Tokens
+      summary: Revoke token
+      operationId: revokeToken
+      parameters:
+        - $ref: '#/components/parameters/TokenId'
+      responses:
+        '204':
+          description: Token revoked successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tokens/validate:
+    post:
+      tags:
+        - Tokens
+      summary: Validate onboarding token
+      operationId: validateToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  token:
+                    $ref: '#/components/schemas/OnboardingToken'
+                  vessel:
+                    $ref: '#/components/schemas/Vessel'
+        '401':
+          description: Token is invalid or expired
+
+  # Integration Endpoints
+  /integration/maintenance-portal/export:
+    post:
+      tags:
+        - Integration
+        - Export
+      summary: Export vessel data to maintenance portal
+      operationId: exportToMaintenance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - vesselId
+              properties:
+                vesselId:
+                  type: string
+                  format: uuid
+                includePhotos:
+                  type: boolean
+                  default: true
+                format:
+                  type: string
+                  enum: [json, xml, csv]
+                  default: json
+      responses:
+        '200':
+          description: Export initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  estimatedCompletionTime:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /integration/maintenance-portal/sync-users:
+    post:
+      tags:
+        - Integration
+      summary: Sync users from maintenance portal
+      operationId: syncUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                companyId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: User sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: integer
+                  created:
+                    type: integer
+                  updated:
+                    type: integer
+                  failed:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /integration/webhooks/progress:
+    post:
+      tags:
+        - Webhooks
+      summary: Webhook endpoint for progress updates
+      operationId: webhookProgress
+      security:
+        - webhookAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - vesselId
+                - event
+                - data
+              properties:
+                vesselId:
+                  type: string
+                  format: uuid
+                event:
+                  type: string
+                  enum: [equipment.added, equipment.updated, equipment.verified, vessel.completed]
+                data:
+                  type: object
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Webhook received successfully
+        '401':
+          description: Invalid webhook signature
+
+  # Sync Endpoints
+  /sync/push:
+    post:
+      tags:
+        - Sync
+      summary: Push offline changes
+      operationId: syncPush
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - changes
+                - lastSyncTimestamp
+              properties:
+                changes:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SyncChange'
+                lastSyncTimestamp:
+                  type: string
+                  format: date-time
+                deviceId:
+                  type: string
+      responses:
+        '200':
+          description: Changes synchronized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Sync conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncConflict'
+
+  /sync/pull:
+    post:
+      tags:
+        - Sync
+      summary: Pull latest changes
+      operationId: syncPull
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lastSyncTimestamp
+              properties:
+                lastSyncTimestamp:
+                  type: string
+                  format: date-time
+                entityTypes:
+                  type: array
+                  items:
+                    type: string
+                    enum: [vessels, equipment, parts]
+                vesselIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: Changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPullResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Analytics Endpoints
+  /analytics/quality-scores:
+    get:
+      tags:
+        - Analytics
+      summary: Get quality score analytics
+      operationId: getQualityScores
+      parameters:
+        - name: vesselId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Quality scores retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityScoreAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /analytics/onboarding-metrics:
+    get:
+      tags:
+        - Analytics
+      summary: Get onboarding metrics
+      operationId: getOnboardingMetrics
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, quarter, year]
+            default: month
+      responses:
+        '200':
+          description: Onboarding metrics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingMetrics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Batch Operations
+  /batch/equipment:
+    post:
+      tags:
+        - Equipment
+      summary: Batch create/update equipment
+      operationId: batchEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operations
+              properties:
+                operations:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - action
+                      - data
+                    properties:
+                      action:
+                        type: string
+                        enum: [create, update, delete]
+                      data:
+                        oneOf:
+                          - $ref: '#/components/schemas/CreateEquipmentRequest'
+                          - $ref: '#/components/schemas/UpdateEquipmentRequest'
+                      equipmentId:
+                        type: string
+                        format: uuid
+                        description: Required for update and delete actions
+      responses:
+        '200':
+          description: Batch operation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchOperationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /batch/parts:
+    post:
+      tags:
+        - Parts
+      summary: Batch create/update parts
+      operationId: batchParts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operations
+              properties:
+                operations:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - action
+                      - data
+                    properties:
+                      action:
+                        type: string
+                        enum: [create, update, delete]
+                      data:
+                        oneOf:
+                          - $ref: '#/components/schemas/CreatePartRequest'
+                          - $ref: '#/components/schemas/UpdatePartRequest'
+                      partId:
+                        type: string
+                        format: uuid
+                        description: Required for update and delete actions
+      responses:
+        '200':
+          description: Batch operation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchOperationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+    webhookAuth:
+      type: apiKey
+      in: header
+      name: X-Webhook-Signature
+
+  parameters:
+    CompanyId:
+      name: companyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    VesselId:
+      name: vesselId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    EquipmentId:
+      name: equipmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    PartId:
+      name: partId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    FileId:
+      name: fileId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    TokenId:
+      name: tokenId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    
+    PageQuery:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    LimitQuery:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    
+    SearchQuery:
+      name: search
+      in: query
+      schema:
+        type: string
+    
+    SortQuery:
+      name: sort
+      in: query
+      schema:
+        type: string
+        pattern: '^[a-zA-Z_]+:(asc|desc)$'
+
+  schemas:
+    # Request Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - fullName
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        fullName:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        companyName:
+          type: string
+        inviteToken:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+          default: false
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+
+    CreateCompanyRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        logoUrl:
+          type: string
+          format: uri
+
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        logoUrl:
+          type: string
+          format: uri
+        isActive:
+          type: boolean
+
+    CreateVesselRequest:
+      type: object
+      required:
+        - companyId
+        - name
+        - imoNumber
+        - flag
+        - type
+        - yearBuilt
+        - grossTonnage
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        imoNumber:
+          type: string
+          pattern: '^[0-9]{7}$'
+        flag:
+          type: string
+        type:
+          $ref: '#/components/schemas/VesselType'
+        yearBuilt:
+          type: integer
+          minimum: 1900
+        grossTonnage:
+          type: number
+        deadWeight:
+          type: number
+        length:
+          type: number
+        beam:
+          type: number
+        draft:
+          type: number
+        mainEngine:
+          type: string
+        auxiliaryEngines:
+          type: array
+          items:
+            type: string
+        classification:
+          type: string
+
+    UpdateVesselRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        flag:
+          type: string
+        type:
+          $ref: '#/components/schemas/VesselType'
+        status:
+          $ref: '#/components/schemas/VesselStatus'
+        mainEngine:
+          type: string
+        auxiliaryEngines:
+          type: array
+          items:
+            type: string
+        classification:
+          type: string
+
+    CreateEquipmentRequest:
+      type: object
+      required:
+        - name
+        - type
+        - manufacturer
+        - model
+        - location
+        - criticalLevel
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/EquipmentType'
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: string
+        installationDate:
+          type: string
+          format: date
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+        technicalSpecs:
+          type: object
+          additionalProperties: true
+
+    UpdateEquipmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/EquipmentType'
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: string
+        installationDate:
+          type: string
+          format: date
+        lastMaintenanceDate:
+          type: string
+          format: date
+        nextMaintenanceDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        technicalSpecs:
+          type: object
+          additionalProperties: true
+
+    CreatePartRequest:
+      type: object
+      required:
+        - name
+        - partNumber
+        - manufacturer
+        - category
+        - criticalLevel
+        - currentStock
+        - minimumStock
+        - reorderPoint
+      properties:
+        name:
+          type: string
+        partNumber:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        category:
+          $ref: '#/components/schemas/PartCategory'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        currentStock:
+          type: integer
+          minimum: 0
+        minimumStock:
+          type: integer
+          minimum: 0
+        maximumStock:
+          type: integer
+          minimum: 0
+        reorderPoint:
+          type: integer
+          minimum: 0
+        unitPrice:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        leadTimeDays:
+          type: integer
+          minimum: 0
+        suppliers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierInput'
+        alternativeParts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlternativePart'
+        specifications:
+          type: object
+          additionalProperties: true
+
+    UpdatePartRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/PartCategory'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        currentStock:
+          type: integer
+          minimum: 0
+        minimumStock:
+          type: integer
+          minimum: 0
+        maximumStock:
+          type: integer
+          minimum: 0
+        reorderPoint:
+          type: integer
+          minimum: 0
+        unitPrice:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        leadTimeDays:
+          type: integer
+          minimum: 0
+        specifications:
+          type: object
+          additionalProperties: true
+
+    GenerateTokenRequest:
+      type: object
+      required:
+        - vesselId
+        - validUntil
+        - permissions
+      properties:
+        vesselId:
+          type: string
+          format: uuid
+        validUntil:
+          type: string
+          format: date-time
+        maxUses:
+          type: integer
+          minimum: 1
+          default: 1
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenPermission'
+        metadata:
+          type: object
+          properties:
+            ipRestrictions:
+              type: array
+              items:
+                type: string
+            allowedUsers:
+              type: array
+              items:
+                type: string
+                format: email
+            notes:
+              type: string
+
+    # Response Schemas
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        companyId:
+          type: string
+          format: uuid
+        avatarUrl:
+          type: string
+          format: uri
+        isActive:
+          type: boolean
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+
+    UserPreferences:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, system]
+        language:
+          type: string
+        notifications:
+          type: object
+          properties:
+            email:
+              type: boolean
+            push:
+              type: boolean
+            inApp:
+              type: boolean
+        defaultView:
+          type: string
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        logoUrl:
+          type: string
+          format: uri
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - postalCode
+        - country
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+
+    Contact:
+      type: object
+      required:
+        - email
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        website:
+          type: string
+          format: uri
+
+    Vessel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        imoNumber:
+          type: string
+        flag:
+          type: string
+        type:
+          $ref: '#/components/schemas/VesselType'
+        yearBuilt:
+          type: integer
+        grossTonnage:
+          type: number
+        deadWeight:
+          type: number
+        length:
+          type: number
+        beam:
+          type: number
+        draft:
+          type: number
+        mainEngine:
+          type: string
+        auxiliaryEngines:
+          type: array
+          items:
+            type: string
+        classification:
+          type: string
+        status:
+          $ref: '#/components/schemas/VesselStatus'
+        onboardingStatus:
+          $ref: '#/components/schemas/OnboardingStatus'
+        onboardingProgress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        qualityScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vesselId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/EquipmentType'
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: string
+        installationDate:
+          type: string
+          format: date
+        lastMaintenanceDate:
+          type: string
+          format: date
+        nextMaintenanceDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        qualityScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileUpload'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileUpload'
+        partCount:
+          type: integer
+        technicalSpecs:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          format: uuid
+        verifiedBy:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Part:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        equipmentId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        partNumber:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        category:
+          $ref: '#/components/schemas/PartCategory'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        currentStock:
+          type: integer
+        minimumStock:
+          type: integer
+        maximumStock:
+          type: integer
+        reorderPoint:
+          type: integer
+        unitPrice:
+          type: number
+        currency:
+          type: string
+        lastOrderDate:
+          type: string
+          format: date
+        leadTimeDays:
+          type: integer
+        suppliers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Supplier'
+        alternativeParts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlternativePart'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileUpload'
+        specifications:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Supplier:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        contact:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+            address:
+              type: string
+        leadTimeDays:
+          type: integer
+        pricePerUnit:
+          type: number
+        currency:
+          type: string
+        minimumOrderQuantity:
+          type: integer
+        lastOrderDate:
+          type: string
+          format: date
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+        notes:
+          type: string
+
+    SupplierInput:
+      type: object
+      required:
+        - name
+        - contact
+        - leadTimeDays
+        - pricePerUnit
+        - currency
+      properties:
+        name:
+          type: string
+        contact:
+          type: object
+          required:
+            - email
+            - phone
+          properties:
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+            address:
+              type: string
+        leadTimeDays:
+          type: integer
+          minimum: 0
+        pricePerUnit:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        minimumOrderQuantity:
+          type: integer
+          minimum: 1
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+        notes:
+          type: string
+
+    AlternativePart:
+      type: object
+      required:
+        - partNumber
+        - manufacturer
+        - compatibility
+      properties:
+        partNumber:
+          type: string
+        manufacturer:
+          type: string
+        compatibility:
+          type: string
+        notes:
+          type: string
+
+    CrossReferencePart:
+      type: object
+      properties:
+        part:
+          $ref: '#/components/schemas/Part'
+        matchType:
+          type: string
+          enum: [exact, compatible, similar]
+        compatibility:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    FileUpload:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        url:
+          type: string
+          format: uri
+        thumbnailUrl:
+          type: string
+          format: uri
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        uploadedBy:
+          type: string
+          format: uuid
+        uploadedAt:
+          type: string
+          format: date-time
+
+    OnboardingToken:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vesselId:
+          type: string
+          format: uuid
+        token:
+          type: string
+        validFrom:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+        maxUses:
+          type: integer
+        currentUses:
+          type: integer
+        createdBy:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TokenStatus'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenPermission'
+        metadata:
+          type: object
+          properties:
+            ipRestrictions:
+              type: array
+              items:
+                type: string
+            allowedUsers:
+              type: array
+              items:
+                type: string
+            notes:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+
+    OnboardingProgress:
+      type: object
+      properties:
+        vesselId:
+          type: string
+          format: uuid
+        overallProgress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        stages:
+          type: object
+          properties:
+            setup:
+              $ref: '#/components/schemas/StageProgress'
+            discovery:
+              $ref: '#/components/schemas/StageProgress'
+            review:
+              $ref: '#/components/schemas/StageProgress'
+        statistics:
+          type: object
+          properties:
+            totalEquipment:
+              type: integer
+            verifiedEquipment:
+              type: integer
+            totalParts:
+              type: integer
+            criticalParts:
+              type: integer
+            totalPhotos:
+              type: integer
+            averageQualityScore:
+              type: number
+        lastUpdated:
+          type: string
+          format: date-time
+
+    StageProgress:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    SyncChange:
+      type: object
+      required:
+        - id
+        - entityType
+        - action
+        - data
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+        entityType:
+          type: string
+          enum: [vessel, equipment, part]
+        entityId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [create, update, delete]
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: integer
+
+    SyncResponse:
+      type: object
+      properties:
+        successful:
+          type: array
+          items:
+            type: string
+            format: uuid
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              error:
+                type: string
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncConflict'
+        newSyncTimestamp:
+          type: string
+          format: date-time
+
+    SyncConflict:
+      type: object
+      properties:
+        entityId:
+          type: string
+          format: uuid
+        entityType:
+          type: string
+        localVersion:
+          type: object
+        serverVersion:
+          type: object
+        resolution:
+          type: string
+          enum: [server_wins, client_wins, manual]
+
+    SyncPullResponse:
+      type: object
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncChange'
+        deletions:
+          type: array
+          items:
+            type: object
+            properties:
+              entityType:
+                type: string
+              entityId:
+                type: string
+                format: uuid
+        newSyncTimestamp:
+          type: string
+          format: date-time
+        hasMore:
+          type: boolean
+
+    QualityScoreAnalytics:
+      type: object
+      properties:
+        averageScore:
+          type: number
+        scoreDistribution:
+          type: object
+          properties:
+            excellent:
+              type: integer
+              description: Score 90-100
+            good:
+              type: integer
+              description: Score 70-89
+            fair:
+              type: integer
+              description: Score 50-69
+            poor:
+              type: integer
+              description: Score 0-49
+        byEquipmentType:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/EquipmentType'
+              averageScore:
+                type: number
+              count:
+                type: integer
+        byVessel:
+          type: array
+          items:
+            type: object
+            properties:
+              vesselId:
+                type: string
+                format: uuid
+              vesselName:
+                type: string
+              averageScore:
+                type: number
+              equipmentCount:
+                type: integer
+        trends:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              averageScore:
+                type: number
+
+    OnboardingMetrics:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            totalVessels:
+              type: integer
+            completedVessels:
+              type: integer
+            inProgressVessels:
+              type: integer
+            averageCompletionTime:
+              type: number
+              description: Average time in days
+        byStatus:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                $ref: '#/components/schemas/OnboardingStatus'
+              count:
+                type: integer
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              period:
+                type: string
+              started:
+                type: integer
+              completed:
+                type: integer
+              averageProgress:
+                type: number
+
+    BatchOperationResponse:
+      type: object
+      properties:
+        successful:
+          type: integer
+        failed:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              success:
+                type: boolean
+              id:
+                type: string
+                format: uuid
+              error:
+                type: string
+
+    # List Response Schemas
+    CompanyListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    VesselListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vessel'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    EquipmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    PartListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    TokenListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingToken'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    # Enums
+    UserRole:
+      type: string
+      enum:
+        - ADMIN
+        - TECHNICIAN
+        - MANAGER
+
+    VesselType:
+      type: string
+      enum:
+        - BULK_CARRIER
+        - CONTAINER
+        - TANKER
+        - GENERAL_CARGO
+        - RORO
+        - PASSENGER
+        - OFFSHORE
+        - OTHER
+
+    VesselStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - MAINTENANCE
+        - DECOMMISSIONED
+
+    OnboardingStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - TOKEN_GENERATED
+        - IN_PROGRESS
+        - PENDING_REVIEW
+        - APPROVED
+        - REJECTED
+        - COMPLETED
+
+    EquipmentType:
+      type: string
+      enum:
+        - ENGINE
+        - GENERATOR
+        - PUMP
+        - COMPRESSOR
+        - CRANE
+        - WINCH
+        - BOILER
+        - PURIFIER
+        - NAVIGATION
+        - SAFETY
+        - HVAC
+        - ELECTRICAL
+        - OTHER
+
+    EquipmentStatus:
+      type: string
+      enum:
+        - OPERATIONAL
+        - DEGRADED
+        - FAILED
+        - MAINTENANCE
+        - DECOMMISSIONED
+
+    CriticalLevel:
+      type: string
+      enum:
+        - CRITICAL
+        - ESSENTIAL
+        - IMPORTANT
+        - STANDARD
+
+    PartCategory:
+      type: string
+      enum:
+        - CONSUMABLE
+        - SPARE
+        - WEAR_PART
+        - EMERGENCY
+        - TOOL
+        - OTHER
+
+    TokenStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - EXPIRED
+        - REVOKED
+        - EXHAUSTED
+
+    TokenPermission:
+      type: string
+      enum:
+        - VIEW_VESSEL
+        - ADD_EQUIPMENT
+        - EDIT_EQUIPMENT
+        - DELETE_EQUIPMENT
+        - ADD_PARTS
+        - UPLOAD_PHOTOS
+        - OFFLINE_ACCESS
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

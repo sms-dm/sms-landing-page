@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./frontend/src/*"],
+      "@app/*": ["./frontend/src/app/*"],
+      "@features/*": ["./frontend/src/features/*"],
+      "@components/*": ["./frontend/src/components/*"],
+      "@hooks/*": ["./frontend/src/hooks/*"],
+      "@utils/*": ["./frontend/src/utils/*"],
+      "@services/*": ["./frontend/src/services/*"],
+      "@store/*": ["./frontend/src/store/*"],
+      "@types/*": ["./frontend/src/types/*"],
+      "@api/*": ["./frontend/src/api/*"],
+      "@config/*": ["./frontend/src/config/*"],
+      "@assets/*": ["./frontend/src/assets/*"]
+    }
+  },
+  "include": ["frontend/src", "backend"],
+  "exclude": ["node_modules", "dist", "build"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

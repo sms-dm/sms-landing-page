@@ -1,0 +1,41 @@
+{
+  "name": "SMS - Smart Maintenance System",
+  "short_name": "SMS",
+  "description": "Professional vessel onboarding and maintenance management system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0F9FF",
+  "theme_color": "#0EA5E9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/images/sms-logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/sms-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/sms-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
+}

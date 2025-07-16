@@ -1,0 +1,17 @@
+# IDEAS BACKLOG
+
+## Format: [DATE] - CATEGORY - DESCRIPTION
+
+[2025-07-06] - FEATURE - Global feedback system with comments button on all dashboards. Captures time, location, date stamps for issues, suggestions, improvements. SMS dashboard can view by company/vessel, analyze patterns across companies for common requests. Monthly prizes for best suggestions to incentivize user engagement.
+
+[2025-07-06] - TECHNICAL - Historical fault data import system to incorporate clients' years of existing equipment fault reports into AI system. Bulk import from various formats (PDF, Excel, scanned documents), OCR processing for handwritten reports, data normalization, equipment matching algorithm. Accelerates AI learning curve by leveraging existing maintenance history rather than starting from scratch.
+
+[2025-07-06] - TECHNICAL - Automated document processing pipeline: 1) Bulk folder upload (drag & drop entire archives), 2) AI-powered document classification (maintenance report vs other docs), 3) Automatic field extraction (equipment name, date, fault type, resolution), 4) Confidence scoring with human review only for low-confidence extractions, 5) Pattern clustering to group similar faults automatically, 6) One-click approval interface showing AI's interpretation for quick validation.
+
+[2025-07-06] - BUSINESS - Equipment mapping strategy for historical data: During onboarding, collect: 1) Historical equipment naming conventions/plant numbers, 2) Equipment retirement dates and replacement mappings, 3) Department/location codes used in old systems. Create "Equipment Alias Database" linking old references to current equipment. AI uses context clues (location, maintenance type, surrounding equipment mentions) to guess matches. Retired equipment data still valuable for pattern analysis on replacement equipment. Provide "Historical Equipment Register" template during sales process.
+
+[2025-07-06] - BUSINESS - Two-phase onboarding process: Phase 1: Technicians complete equipment inventory and basic setup. Phase 2: Manager receives automated email with equipment list and simple upload interface - "Help our AI learn your equipment's history". For each major equipment item, optional drag-drop area for historical reports. Alternatively, one bulk upload with AI matching. Make it voluntary but incentivized - "Upload 10+ historical reports, get first month 10% discount". Gamify with progress bar showing AI knowledge improvement per equipment.
+
+[2025-07-06] - TECHNICAL - Integration into existing equipment approval flow: When manager reviews equipment list (VesselEquipmentReviewPage), add "Historical Data" tab next to each equipment card. Show: 1) Upload dropzone for that specific equipment, 2) "AI Knowledge Level" progress bar (starts empty), 3) Tips like "PDFs with equipment name in title work best", 4) Preview of extracted data as files process. After approval, show dashboard summarizing AI's learning from all uploads. Start with per-equipment uploads to encourage organization, with "Bulk Upload" as secondary option for well-organized archives.
+
+[2025-01-07] - FEATURE - Customization onboarding workflow - Allow clients to customize dashboards and documentation during onboarding before technicians start documenting. Three-tier system (Basic/Professional/Enterprise) with configuration workshop. Blocks technician access until configuration complete to ensure they see correct forms/fields.

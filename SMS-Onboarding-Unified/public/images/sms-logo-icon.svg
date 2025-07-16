@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <defs>
+    <linearGradient id="iconWaveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconCircuitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38BDF8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891B2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="30" cy="30" r="28" fill="#F0F9FF" stroke="#E0F2FE" stroke-width="2"/>
+  
+  <!-- Wave Design (simplified for icon) -->
+  <path d="M10 30 Q20 20 30 30 T50 30" 
+        stroke="url(#iconWaveGradient)" 
+        stroke-width="3" 
+        fill="none"/>
+  
+  <!-- Circuit Elements -->
+  <circle cx="15" cy="25" r="2" fill="url(#iconCircuitGradient)"/>
+  <circle cx="30" cy="30" r="2" fill="url(#iconCircuitGradient)"/>
+  <circle cx="45" cy="25" r="2" fill="url(#iconCircuitGradient)"/>
+  
+  <!-- SMS Text (compact) -->
+  <text x="30" y="45" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0F172A" text-anchor="middle">SMS</text>
+</svg>
