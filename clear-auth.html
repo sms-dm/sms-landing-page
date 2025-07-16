@@ -1,0 +1,15 @@
+<\!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Auth</title>
+</head>
+<body>
+    <h1>Clearing authentication...</h1>
+    <script>
+        localStorage.removeItem('sms-preview-auth');
+        alert('Authentication cleared\! Redirecting to home...');
+        window.location.href = '/';
+    </script>
+</body>
+</html>
+EOF < /dev/null
