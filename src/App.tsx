@@ -5,6 +5,7 @@ import ActivationHelpPage from './pages/ActivationHelpPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import WarpTransition from './pages/WarpTransition';
 import PortalAccessPage from './pages/PortalAccessPage';
+import DemoRedirect from './pages/DemoRedirect';
 import NeuralBackground from './components/NeuralBackground';
 import { useEffect, useState } from 'react';
 
@@ -60,6 +61,9 @@ function App() {
         
         {/* Portal Access Page - for authenticated users */}
         <Route path="/portals" element={<PortalAccessPage />} />
+        
+        {/* Demo redirect */}
+        <Route path="/demo" element={<DemoRedirect />} />
         
       </Routes>
     </Router>
