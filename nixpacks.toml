@@ -5,7 +5,7 @@ nixPkgs = ["nodejs-18_x"]
 cmds = ["npm ci --production=false"]
 
 [phases.build]
-cmds = ["npm run build", "ls -la dist/"]
+cmds = ["npm run build"]
 
 [start]
-cmd = "npx serve@14 dist -s -l 3000"
+cmd = "npx serve ./dist -s -p ${PORT:-3000}"
