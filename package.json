@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cp -r public/demo dist/",
     "preview": "vite preview",
     "serve": "node server.js",
     "start": "serve dist -s -l 3000"
