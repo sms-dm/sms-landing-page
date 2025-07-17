@@ -2,75 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-numReplicas = 1
-healthcheckPath = "/health"
-healthcheckTimeout = 100
+healthcheckPath = "/"
+healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
-
-# Landing Page Service
-[[services]]
-name = "sms-landing"
-buildCommand = "cd sms-landing && npm install && npm run build"
-startCommand = "cd sms-landing && npm start"
-port = 3002
-healthcheckPath = "/"
-
-[services.sms-landing.envs]
-NODE_ENV = "production"
-NEXT_PUBLIC_API_URL = "https://${{RAILWAY_PUBLIC_DOMAIN}}"
-
-# Onboarding Backend Service  
-[[services]]
-name = "onboarding-backend"
-buildCommand = "cd SMS-Onboarding-Unified/backend && npm install && npx prisma generate"
-startCommand = "cd SMS-Onboarding-Unified/backend && npx prisma migrate deploy && npm start"
-port = 3006
-healthcheckPath = "/api/health"
-
-[services.onboarding-backend.envs]
-NODE_ENV = "production"
-DATABASE_URL = "${{POSTGRESQL_URL}}"
-JWT_SECRET = "${{JWT_SECRET}}"
-PORT = "3006"
-
-# Onboarding Frontend Service
-[[services]]
-name = "onboarding-frontend"  
-buildCommand = "cd SMS-Onboarding-Unified && npm ci && npm run build"
-startCommand = "cd SMS-Onboarding-Unified && npx serve -s dist -l ${PORT:-4173}"
-port = 4173
-healthcheckPath = "/"
-
-[services.onboarding-frontend.envs]
-NODE_ENV = "production"
-PORT = "4173"
-VITE_API_BASE_URL = "https://${{services.onboarding-backend.RAILWAY_PUBLIC_DOMAIN}}"
-
-# Maintenance Backend Service
-[[services]]
-name = "maintenance-backend"
-buildCommand = "cd sms-app/backend && npm install && npx prisma generate"  
-startCommand = "cd sms-app/backend && npx prisma migrate deploy && npm start"
-port = 5001
-healthcheckPath = "/api/health"
-
-[services.maintenance-backend.envs]
-NODE_ENV = "production"
-DATABASE_URL = "${{POSTGRESQL_URL}}"
-JWT_SECRET = "${{JWT_SECRET}}"
-PORT = "5001"
-CORS_ORIGIN = "https://${{services.maintenance-frontend.RAILWAY_PUBLIC_DOMAIN}}"
-
-# Maintenance Frontend Service
-[[services]]
-name = "maintenance-frontend"
-buildCommand = "cd sms-app/frontend && npm install && npm run build"
-startCommand = "cd sms-app/frontend && npx serve -s build -l 4173"  
-port = 4173
-healthcheckPath = "/"
-
-[services.maintenance-frontend.envs]
-NODE_ENV = "production"
-PORT = "4173"
-VITE_API_URL = "https://${{services.maintenance-backend.RAILWAY_PUBLIC_DOMAIN}}/api"
