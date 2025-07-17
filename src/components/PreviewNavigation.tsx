@@ -56,9 +56,9 @@ const PreviewNavigation: React.FC = () => {
                 {link.name}
               </a>
             ))}
-            <a href="/demo/index.html" className="ai-button">
+            <Link to="/demo" className="ai-button">
               Onboarding Demo
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 text-gray-400 hover:text-red-400 transition-colors"
@@ -95,13 +95,13 @@ const PreviewNavigation: React.FC = () => {
                 {link.name}
               </a>
             ))}
-            <a
-              href="/demo/index.html"
+            <Link
+              to="/demo"
               className="ai-button inline-block mt-4"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Onboarding Demo
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 text-gray-400 hover:text-red-400 transition-colors mt-4"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FiChevronRight, FiCpu, FiTrendingUp } from 'react-icons/fi';
 import { BsLightningCharge } from 'react-icons/bs';
 
@@ -117,15 +117,15 @@ const HeroSection: React.FC = () => {
               <FiChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </a>
             
-            <a
-              href="/demo/index.html"
+            <Link
+              to="/demo"
               className="inline-flex items-center px-8 py-3 border-2 border-sms-neonBlue text-sms-neonBlue 
                        font-semibold rounded-lg hover:bg-sms-neonBlue hover:text-sms-deepBlue transition-all duration-300 group"
             >
               <BsLightningCharge className="mr-2" />
               <span>Onboarding Demo</span>
               <FiChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </motion.div>
 
           {/* Key Benefits */}
