@@ -118,7 +118,7 @@ const HeroSection: React.FC = () => {
             </a>
             
             <a
-              href="/demo"
+              href="/demo/index.html"
               className="inline-flex items-center px-8 py-3 border-2 border-sms-neonBlue text-sms-neonBlue 
                        font-semibold rounded-lg hover:bg-sms-neonBlue hover:text-sms-deepBlue transition-all duration-300 group"
             >

@@ -56,7 +56,7 @@ const PreviewNavigation: React.FC = () => {
                 {link.name}
               </a>
             ))}
-            <a href="/demo" className="ai-button">
+            <a href="/demo/index.html" className="ai-button">
               Onboarding Demo
             </a>
             <button
@@ -96,7 +96,7 @@ const PreviewNavigation: React.FC = () => {
               </a>
             ))}
             <a
-              href="/demo"
+              href="/demo/index.html"
               className="ai-button inline-block mt-4"
               onClick={() => setIsMobileMenuOpen(false)}
             >
