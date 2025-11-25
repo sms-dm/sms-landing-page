@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-sms-deepBlue text-sms-lightGray overflow-x-hidden;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-sms-deepBlue;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-sms-electricBlue rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-sms-neonBlue;
+  }
+}
+
+@layer components {
+  .tech-text {
+    @apply font-tech tracking-wider;
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .glow-text {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .ai-border {
+    @apply border border-sms-neonBlue/30;
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  }
+  
+  .ai-button {
+    @apply px-8 py-3 bg-gradient-to-r from-sms-electricBlue to-sms-neonBlue text-white 
+           font-semibold tracking-wider uppercase transition-all duration-300
+           hover:shadow-lg hover:shadow-sms-neonBlue/50 active:scale-95 rounded-lg;
+  }
+  
+  .ai-card {
+    @apply bg-sms-darkBlue/50 backdrop-blur-sm border border-sms-electricBlue/20
+           rounded-lg p-6 transition-all duration-300
+           hover:border-sms-neonBlue/50 hover:shadow-lg hover:shadow-sms-neonBlue/20;
+  }
+  
+  /* Neural network background */
+  .neural-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+    background: linear-gradient(135deg, #001E3C 0%, #0A1929 50%, #001E3C 100%);
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
+  }
+  
+  .neural-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: particle-flow 20s linear infinite;
+  }
+  
+  /* Data flow lines */
+  .data-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #00D9FF, transparent);
+    animation: data-pulse 3s ease-in-out infinite;
+  }
+  
+  /* AI glow effect */
+  .ai-glow {
+    position: relative;
+  }
+  
+  .ai-glow::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #00D9FF, #0096FF, #00D9FF);
+    border-radius: inherit;
+    opacity: 0.5;
+    filter: blur(10px);
+    z-index: -1;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  /* Terminal cursor - removed glitchy version */
+  .terminal-cursor::after {
+    content: '_';
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+}

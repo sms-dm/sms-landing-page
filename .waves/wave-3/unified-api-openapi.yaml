@@ -1,0 +1,1980 @@
+openapi: 3.1.0
+info:
+  title: SMS Unified Portal API
+  description: |
+    Unified API specification for SMS Onboarding and Maintenance Portal integration.
+    This API provides consistent patterns for vessel management, equipment documentation,
+    parts inventory, and cross-portal data synchronization.
+  version: 1.0.0
+  contact:
+    name: SMS API Support
+    email: api-support@sms-portal.com
+    url: https://docs.sms-portal.com
+  license:
+    name: Proprietary
+    url: https://sms-portal.com/license
+
+servers:
+  - url: https://api.sms-portal.com/v1
+    description: Production API Gateway
+  - url: https://api.onboarding.sms-portal.com/v1
+    description: Onboarding Portal API
+  - url: https://api.maintenance.sms-portal.com/v1
+    description: Maintenance Portal API
+  - url: https://staging-api.sms-portal.com/v1
+    description: Staging Environment
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Companies
+    description: Company management operations
+  - name: Vessels
+    description: Vessel management and operations
+  - name: Equipment
+    description: Equipment documentation and management
+  - name: Parts
+    description: Parts inventory and cross-reference
+  - name: Maintenance
+    description: Maintenance schedules and operations
+  - name: Integration
+    description: Cross-portal data synchronization
+  - name: Webhooks
+    description: Event notifications and subscriptions
+  - name: Analytics
+    description: Reporting and analytics endpoints
+  - name: Files
+    description: File upload and management
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      x-rate-limit:
+        requests: 5
+        window: 15m
+        by: ip
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  # Company Management
+  /companies:
+    get:
+      tags:
+        - Companies
+      summary: List companies
+      operationId: listCompanies
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/SortParam'
+        - name: active
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: Companies retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: company.read
+
+    post:
+      tags:
+        - Companies
+      summary: Create company
+      operationId: createCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '201':
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: company.create
+      x-roles: [ADMIN, SUPER_ADMIN]
+
+  /companies/{companyId}:
+    parameters:
+      - $ref: '#/components/parameters/CompanyIdParam'
+    
+    get:
+      tags:
+        - Companies
+      summary: Get company details
+      operationId: getCompany
+      responses:
+        '200':
+          description: Company details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: company.read
+
+    patch:
+      tags:
+        - Companies
+      summary: Update company
+      operationId: updateCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: Company updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: company.update
+      x-roles: [ADMIN, SUPER_ADMIN]
+
+  # Vessel Management
+  /vessels:
+    get:
+      tags:
+        - Vessels
+      summary: List vessels
+      operationId: listVessels
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/SortParam'
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/VesselStatus'
+        - name: onboardingStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/OnboardingStatus'
+      responses:
+        '200':
+          description: Vessels retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VesselListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: vessel.read
+
+    post:
+      tags:
+        - Vessels
+      summary: Create vessel
+      operationId: createVessel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVesselRequest'
+      responses:
+        '201':
+          description: Vessel created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: vessel.create
+
+  /vessels/{vesselId}:
+    parameters:
+      - $ref: '#/components/parameters/VesselIdParam'
+    
+    get:
+      tags:
+        - Vessels
+      summary: Get vessel details
+      operationId: getVessel
+      responses:
+        '200':
+          description: Vessel details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: vessel.read
+
+    patch:
+      tags:
+        - Vessels
+      summary: Update vessel
+      operationId: updateVessel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVesselRequest'
+      responses:
+        '200':
+          description: Vessel updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vessel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: vessel.update
+
+  /vessels/{vesselId}/status:
+    parameters:
+      - $ref: '#/components/parameters/VesselIdParam'
+    
+    get:
+      tags:
+        - Vessels
+      summary: Get vessel operational status
+      operationId: getVesselStatus
+      responses:
+        '200':
+          description: Vessel status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VesselOperationalStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: vessel.read
+
+  # Equipment Management
+  /vessels/{vesselId}/equipment:
+    parameters:
+      - $ref: '#/components/parameters/VesselIdParam'
+    
+    get:
+      tags:
+        - Equipment
+      summary: List vessel equipment
+      operationId: listVesselEquipment
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EquipmentType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/EquipmentStatus'
+        - name: criticalLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/CriticalLevel'
+      responses:
+        '200':
+          description: Equipment list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: equipment.read
+
+    post:
+      tags:
+        - Equipment
+      summary: Add equipment to vessel
+      operationId: addEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '201':
+          description: Equipment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: equipment.create
+
+  /equipment/{equipmentId}:
+    parameters:
+      - $ref: '#/components/parameters/EquipmentIdParam'
+    
+    get:
+      tags:
+        - Equipment
+      summary: Get equipment details
+      operationId: getEquipment
+      responses:
+        '200':
+          description: Equipment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: equipment.read
+
+    patch:
+      tags:
+        - Equipment
+      summary: Update equipment
+      operationId: updateEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEquipmentRequest'
+      responses:
+        '200':
+          description: Equipment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: equipment.update
+
+  /equipment/{equipmentId}/verify:
+    parameters:
+      - $ref: '#/components/parameters/EquipmentIdParam'
+    
+    post:
+      tags:
+        - Equipment
+      summary: Verify equipment
+      operationId: verifyEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - qualityScore
+              properties:
+                qualityScore:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Equipment verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: equipment.verify
+      x-roles: [MANAGER, ADMIN]
+
+  # Parts Management
+  /parts/cross-reference:
+    post:
+      tags:
+        - Parts
+      summary: Find alternative parts
+      operationId: crossReferenceParts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - partNumber
+              properties:
+                partNumber:
+                  type: string
+                manufacturer:
+                  type: string
+                equipmentType:
+                  $ref: '#/components/schemas/EquipmentType'
+      responses:
+        '200':
+          description: Cross-reference results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrossReferenceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: parts.read
+
+  # Integration Endpoints
+  /sync/export:
+    post:
+      tags:
+        - Integration
+      summary: Export data to target system
+      operationId: exportData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+      responses:
+        '202':
+          description: Export job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: sync.export
+      x-rate-limit:
+        requests: 10
+        window: 1h
+        by: company
+
+  /sync/import:
+    post:
+      tags:
+        - Integration
+      summary: Import data from source system
+      operationId: importData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportRequest'
+      responses:
+        '202':
+          description: Import job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJobResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: sync.import
+      x-roles: [ADMIN]
+
+  /sync/status/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags:
+        - Integration
+      summary: Get sync job status
+      operationId: getSyncJobStatus
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncJobStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: sync.read
+
+  # Webhook Management
+  /webhooks/register:
+    post:
+      tags:
+        - Webhooks
+      summary: Register webhook endpoint
+      operationId: registerWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterWebhookRequest'
+      responses:
+        '201':
+          description: Webhook registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      x-permission: webhook.create
+
+  /webhooks/{webhookId}:
+    parameters:
+      - name: webhookId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags:
+        - Webhooks
+      summary: Get webhook details
+      operationId: getWebhook
+      responses:
+        '200':
+          description: Webhook details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: webhook.read
+
+    delete:
+      tags:
+        - Webhooks
+      summary: Unregister webhook
+      operationId: deleteWebhook
+      responses:
+        '204':
+          description: Webhook deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-permission: webhook.delete
+
+  # Analytics Endpoints
+  /analytics/quality-scores:
+    get:
+      tags:
+        - Analytics
+      summary: Get quality score analytics
+      operationId: getQualityScores
+      parameters:
+        - name: vesselId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+            enum: [vessel, equipment, technician]
+      responses:
+        '200':
+          description: Quality score analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityScoreAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: analytics.read
+
+  # Health Check
+  /health:
+    get:
+      tags:
+        - System
+      summary: Basic health check
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /health/detailed:
+    get:
+      tags:
+        - System
+      summary: Detailed health check
+      operationId: detailedHealthCheck
+      responses:
+        '200':
+          description: Detailed system status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedHealthStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      x-permission: system.health
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+    
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service authentication
+
+  parameters:
+    CompanyIdParam:
+      name: companyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Company identifier
+    
+    VesselIdParam:
+      name: vesselId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Vessel identifier
+    
+    EquipmentIdParam:
+      name: equipmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Equipment identifier
+    
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination
+    
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+      description: Number of items per page
+    
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+      description: Search query string
+    
+    SortParam:
+      name: sort
+      in: query
+      schema:
+        type: string
+        pattern: '^[a-zA-Z_]+:(asc|desc)$'
+      description: Sort order (e.g., 'name:asc')
+
+  schemas:
+    # Request Schemas
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+        rememberMe:
+          type: boolean
+          default: false
+        mfaCode:
+          type: string
+          pattern: '^[0-9]{6}$'
+          description: MFA code if enabled
+
+    CreateCompanyRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        registrationNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        settings:
+          $ref: '#/components/schemas/CompanySettings'
+
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        settings:
+          $ref: '#/components/schemas/CompanySettings'
+        isActive:
+          type: boolean
+
+    CreateVesselRequest:
+      type: object
+      required:
+        - companyId
+        - name
+        - imoNumber
+        - flag
+        - type
+        - yearBuilt
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        imoNumber:
+          type: string
+          pattern: '^[0-9]{7}$'
+        flag:
+          type: string
+          minLength: 2
+          maxLength: 2
+        type:
+          $ref: '#/components/schemas/VesselType'
+        yearBuilt:
+          type: integer
+          minimum: 1900
+          maximum: 2100
+        specifications:
+          $ref: '#/components/schemas/VesselSpecifications'
+
+    UpdateVesselRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        flag:
+          type: string
+        status:
+          $ref: '#/components/schemas/VesselStatus'
+        specifications:
+          $ref: '#/components/schemas/VesselSpecifications'
+
+    CreateEquipmentRequest:
+      type: object
+      required:
+        - name
+        - type
+        - manufacturer
+        - model
+        - location
+        - criticalLevel
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/EquipmentType'
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: string
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        specifications:
+          type: object
+          additionalProperties: true
+
+    UpdateEquipmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        lastMaintenanceDate:
+          type: string
+          format: date
+        nextMaintenanceDate:
+          type: string
+          format: date
+
+    ExportRequest:
+      type: object
+      required:
+        - targetSystem
+        - dataType
+      properties:
+        targetSystem:
+          type: string
+          enum: [maintenance, onboarding]
+        dataType:
+          type: string
+          enum: [vessels, equipment, parts, full]
+        vesselId:
+          type: string
+          format: uuid
+        exportType:
+          type: string
+          enum: [full, incremental, specific]
+          default: full
+        includeAttachments:
+          type: boolean
+          default: false
+        format:
+          type: string
+          enum: [json, xml, csv]
+          default: json
+
+    ImportRequest:
+      type: object
+      required:
+        - sourceSystem
+        - dataType
+      properties:
+        sourceSystem:
+          type: string
+          enum: [maintenance, onboarding]
+        dataType:
+          type: string
+          enum: [vessels, equipment, parts]
+        mergeStrategy:
+          type: string
+          enum: [overwrite, merge, skip]
+          default: merge
+        validateOnly:
+          type: boolean
+          default: false
+
+    RegisterWebhookRequest:
+      type: object
+      required:
+        - url
+        - events
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/WebhookEvent'
+        secret:
+          type: string
+          minLength: 32
+        active:
+          type: boolean
+          default: true
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+
+    # Response Schemas
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          default: Bearer
+        expiresIn:
+          type: integer
+          description: Token TTL in seconds
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        companyId:
+          type: string
+          format: uuid
+        permissions:
+          type: array
+          items:
+            type: string
+        lastLogin:
+          type: string
+          format: date-time
+        mfaEnabled:
+          type: boolean
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        settings:
+          $ref: '#/components/schemas/CompanySettings'
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - postalCode
+        - country
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+
+    Contact:
+      type: object
+      required:
+        - email
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        website:
+          type: string
+          format: uri
+
+    CompanySettings:
+      type: object
+      properties:
+        timezone:
+          type: string
+        dateFormat:
+          type: string
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        features:
+          type: object
+          properties:
+            onboarding:
+              type: boolean
+            maintenance:
+              type: boolean
+            inventory:
+              type: boolean
+            analytics:
+              type: boolean
+
+    Vessel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        imoNumber:
+          type: string
+        flag:
+          type: string
+        type:
+          $ref: '#/components/schemas/VesselType'
+        yearBuilt:
+          type: integer
+        status:
+          $ref: '#/components/schemas/VesselStatus'
+        onboardingStatus:
+          $ref: '#/components/schemas/OnboardingStatus'
+        specifications:
+          $ref: '#/components/schemas/VesselSpecifications'
+        statistics:
+          $ref: '#/components/schemas/VesselStatistics'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VesselSpecifications:
+      type: object
+      properties:
+        grossTonnage:
+          type: number
+        deadWeight:
+          type: number
+        length:
+          type: number
+        beam:
+          type: number
+        draft:
+          type: number
+        mainEngine:
+          type: string
+        auxiliaryEngines:
+          type: array
+          items:
+            type: string
+        classification:
+          type: string
+
+    VesselStatistics:
+      type: object
+      properties:
+        equipmentCount:
+          type: integer
+        criticalEquipmentCount:
+          type: integer
+        totalParts:
+          type: integer
+        onboardingProgress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        qualityScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    VesselOperationalStatus:
+      type: object
+      properties:
+        vesselId:
+          type: string
+          format: uuid
+        operationalStatus:
+          type: string
+          enum: [at_sea, in_port, maintenance, laid_up]
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+            port:
+              type: string
+        lastUpdate:
+          type: string
+          format: date-time
+
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vesselId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/EquipmentType'
+        manufacturer:
+          type: string
+        model:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: string
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+        criticalLevel:
+          $ref: '#/components/schemas/CriticalLevel'
+        qualityScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        maintenanceInfo:
+          $ref: '#/components/schemas/MaintenanceInfo'
+        specifications:
+          type: object
+          additionalProperties: true
+        verified:
+          type: boolean
+        verifiedBy:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MaintenanceInfo:
+      type: object
+      properties:
+        installationDate:
+          type: string
+          format: date
+        lastMaintenanceDate:
+          type: string
+          format: date
+        nextMaintenanceDate:
+          type: string
+          format: date
+        maintenanceInterval:
+          type: integer
+          description: Days between maintenance
+        runningHours:
+          type: number
+        maintenanceHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              type:
+                type: string
+              description:
+                type: string
+              performedBy:
+                type: string
+
+    CrossReferenceResponse:
+      type: object
+      properties:
+        originalPart:
+          type: object
+          properties:
+            partNumber:
+              type: string
+            manufacturer:
+              type: string
+            description:
+              type: string
+        alternatives:
+          type: array
+          items:
+            type: object
+            properties:
+              partNumber:
+                type: string
+              manufacturer:
+                type: string
+              compatibility:
+                type: integer
+                minimum: 0
+                maximum: 100
+              priceRatio:
+                type: number
+              availability:
+                type: string
+                enum: [in_stock, available, limited, unavailable]
+              leadTime:
+                type: integer
+                description: Lead time in days
+
+    ExportJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        createdAt:
+          type: string
+          format: date-time
+        estimatedCompletionTime:
+          type: string
+          format: date-time
+        resultUrl:
+          type: string
+          format: uri
+
+    ImportJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, validating, processing, completed, failed]
+        createdAt:
+          type: string
+          format: date-time
+        validationResult:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            errors:
+              type: array
+              items:
+                type: string
+            warnings:
+              type: array
+              items:
+                type: string
+
+    SyncJobStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [export, import]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        statistics:
+          type: object
+          properties:
+            totalRecords:
+              type: integer
+            processedRecords:
+              type: integer
+            successfulRecords:
+              type: integer
+            failedRecords:
+              type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        resultUrl:
+          type: string
+          format: uri
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              recordId:
+                type: string
+              error:
+                type: string
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookEvent'
+        active:
+          type: boolean
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        statistics:
+          type: object
+          properties:
+            totalDeliveries:
+              type: integer
+            successfulDeliveries:
+              type: integer
+            failedDeliveries:
+              type: integer
+            lastDelivery:
+              type: string
+              format: date-time
+            lastSuccess:
+              type: string
+              format: date-time
+            lastFailure:
+              type: string
+              format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    QualityScoreAnalytics:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+            to:
+              type: string
+              format: date
+        aggregations:
+          type: object
+          properties:
+            averageScore:
+              type: number
+            totalEquipment:
+              type: integer
+            scoreDistribution:
+              type: object
+              properties:
+                excellent:
+                  type: integer
+                  description: 90-100
+                good:
+                  type: integer
+                  description: 70-89
+                fair:
+                  type: integer
+                  description: 50-69
+                poor:
+                  type: integer
+                  description: 0-49
+        breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              dimension:
+                type: string
+              value:
+                type: string
+              averageScore:
+                type: number
+              count:
+                type: integer
+
+    DetailedHealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          properties:
+            database:
+              $ref: '#/components/schemas/ServiceHealth'
+            redis:
+              $ref: '#/components/schemas/ServiceHealth'
+            storage:
+              $ref: '#/components/schemas/ServiceHealth'
+            messaging:
+              $ref: '#/components/schemas/ServiceHealth'
+        integrations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ServiceHealth'
+
+    ServiceHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        responseTime:
+          type: integer
+          description: Response time in milliseconds
+        lastCheck:
+          type: string
+          format: date-time
+        error:
+          type: string
+
+    # List Response Schemas
+    CompanyListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    VesselListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vessel'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    EquipmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalCount:
+          type: integer
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        first:
+          type: string
+          format: uri
+        last:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+        prev:
+          type: string
+          format: uri
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              message:
+                type: string
+        meta:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            requestId:
+              type: string
+            documentation:
+              type: string
+              format: uri
+
+    # Enums
+    UserRole:
+      type: string
+      enum:
+        - SUPER_ADMIN
+        - ADMIN
+        - MANAGER
+        - TECHNICIAN
+        - HSE_OFFICER
+        - VIEWER
+
+    VesselType:
+      type: string
+      enum:
+        - BULK_CARRIER
+        - CONTAINER
+        - TANKER
+        - GENERAL_CARGO
+        - RORO
+        - PASSENGER
+        - OFFSHORE
+        - TUG
+        - BARGE
+        - OTHER
+
+    VesselStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - MAINTENANCE
+        - LAID_UP
+        - SOLD
+        - SCRAPPED
+
+    OnboardingStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - TOKEN_GENERATED
+        - IN_PROGRESS
+        - PENDING_REVIEW
+        - APPROVED
+        - REJECTED
+        - COMPLETED
+
+    EquipmentType:
+      type: string
+      enum:
+        - ENGINE
+        - GENERATOR
+        - PUMP
+        - COMPRESSOR
+        - CRANE
+        - WINCH
+        - BOILER
+        - PURIFIER
+        - NAVIGATION
+        - SAFETY
+        - HVAC
+        - ELECTRICAL
+        - HYDRAULIC
+        - PNEUMATIC
+        - OTHER
+
+    EquipmentStatus:
+      type: string
+      enum:
+        - OPERATIONAL
+        - DEGRADED
+        - FAILED
+        - MAINTENANCE
+        - STANDBY
+        - DECOMMISSIONED
+
+    CriticalLevel:
+      type: string
+      enum:
+        - CRITICAL
+        - ESSENTIAL
+        - IMPORTANT
+        - STANDARD
+        - LOW
+
+    WebhookEvent:
+      type: string
+      enum:
+        # Vessel Events
+        - vessel.created
+        - vessel.updated
+        - vessel.deleted
+        - vessel.status_changed
+        
+        # Onboarding Events
+        - onboarding.started
+        - onboarding.progress_updated
+        - onboarding.completed
+        - onboarding.rejected
+        
+        # Equipment Events
+        - equipment.created
+        - equipment.updated
+        - equipment.deleted
+        - equipment.verified
+        - equipment.status_changed
+        
+        # Maintenance Events
+        - maintenance.scheduled
+        - maintenance.started
+        - maintenance.completed
+        - maintenance.overdue
+        
+        # Inventory Events
+        - inventory.low_stock
+        - inventory.out_of_stock
+        - inventory.reorder_triggered
+        - inventory.received
+        
+        # System Events
+        - sync.completed
+        - sync.failed
+        - export.completed
+        - import.completed
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: Invalid request data
+            details:
+              - field: email
+                code: INVALID_FORMAT
+                message: Email format is invalid
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: Authentication required
+            meta:
+              documentation: https://docs.sms-portal.com/auth
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: FORBIDDEN
+            message: Insufficient permissions for this operation
+
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: NOT_FOUND
+            message: Resource not found
+
+    RateLimited:
+      description: Too Many Requests
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: RATE_LIMITED
+            message: Rate limit exceeded. Please retry after 60 seconds
+
+# API Extensions for documentation
+x-readme:
+  explorer-enabled: true
+  proxy-enabled: true
+  samples-languages:
+    - javascript
+    - python
+    - curl
+    - java
+    - csharp
+    - php
+    - ruby
+
+x-security-requirements:
+  api-protection: 
+    - WAF enabled
+    - DDoS protection
+    - IP whitelisting for sensitive endpoints
+    - Audit logging for all requests
+  
+  data-protection:
+    - TLS 1.3 minimum
+    - AES-256 encryption at rest
+    - Field-level encryption for PII
+    - Data masking in logs

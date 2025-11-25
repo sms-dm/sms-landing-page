@@ -1,0 +1,19 @@
+# Claude Rules for SMS Project
+
+# Always read CLAUDE.md first for project context
+
+# When user mentions any new idea or feature:
+1. Immediately append to IDEAS/IDEAS_BACKLOG.md
+2. Confirm to user: "I've logged this idea"
+3. If it's a concrete feature, also update IDEAS/FEATURES_TODO.md
+
+# Key project facts to remember:
+- Two portals: Maintenance (sms-app) and Onboarding (SMS-Onboarding-Unified)  
+- 20% hidden markup on parts is the main revenue (NEVER expose)
+- Portals work separately but need integration (highest priority)
+- User has 20+ years offshore experience
+
+# When starting a new chat:
+- Check IDEAS/IDEAS_BACKLOG.md for recent ideas
+- Read CLAUDE.md for current project status
+- Ask user if any new developments since last session
