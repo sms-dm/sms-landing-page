@@ -291,8 +291,8 @@ const HomePage: React.FC = () => {
                 <div>
                   <ScreenshotPlaceholder
                     filename="setup-assistant.png"
-                    alt="Industry selection during setup showing 9 industries: Maritime, Construction, Mining, Energy, Oil & Gas, Healthcare, Manufacturing, Logistics, Transport"
-                    onClick={() => setLightboxImage({ src: '/screenshots/setup-assistant.png', alt: 'Industry selection during setup showing 9 industries: Maritime, Construction, Mining, Energy, Oil & Gas, Healthcare, Manufacturing, Logistics, Transport' })}
+                    alt="Onboarding Progress Dashboard showing 65% overall completion with 3 sections: Company Details & Branding, Vessel Information, and Team Structure - each with progress tracking and team assignments"
+                    onClick={() => setLightboxImage({ src: '/screenshots/setup-assistant.png', alt: 'Onboarding Progress Dashboard showing 65% overall completion with 3 sections: Company Details & Branding, Vessel Information, and Team Structure - each with progress tracking and team assignments' })}
                   />
                 </div>
               </div>
@@ -302,8 +302,8 @@ const HomePage: React.FC = () => {
                 <div className="order-2 md:order-1">
                   <ScreenshotPlaceholder
                     filename="technician-dashboard.png"
-                    alt="SMS Technician Dashboard showing equipment organised by vessel areas (Engine Room, Bridge, Deck Machinery) with completion percentages and quality scores"
-                    onClick={() => setLightboxImage({ src: '/screenshots/technician-dashboard.png', alt: 'SMS Technician Dashboard showing equipment organised by vessel areas (Engine Room, Bridge, Deck Machinery) with completion percentages and quality scores' })}
+                    alt="Technician Dashboard with Quick Actions (Critical Fault, Minor Fault, Direct Fix, QR Scanner, Handover, Emergency), Permit & Control Systems, HSE Updates, and 24/7 Private Support Chat"
+                    onClick={() => setLightboxImage({ src: '/screenshots/technician-dashboard.png', alt: 'Technician Dashboard with Quick Actions (Critical Fault, Minor Fault, Direct Fix, QR Scanner, Handover, Emergency), Permit & Control Systems, HSE Updates, and 24/7 Private Support Chat' })}
                   />
                 </div>
                 <div className="order-1 md:order-2">
@@ -367,8 +367,8 @@ const HomePage: React.FC = () => {
                 <div>
                   <ScreenshotPlaceholder
                     filename="equipment-documentation-form.png"
-                    alt="Real-time quality scoring (0-100 points) during equipment documentation with breakdown showing Basic Info 20/20, Photos 15/20, Spare Parts 18/20, Critical Parts 16/20, Documentation 20/20"
-                    onClick={() => setLightboxImage({ src: '/screenshots/equipment-documentation-form.png', alt: 'Real-time quality scoring (0-100 points) during equipment documentation with breakdown showing Basic Info 20/20, Photos 15/20, Spare Parts 18/20, Critical Parts 16/20, Documentation 20/20' })}
+                    alt="Equipment Documentation form with real-time quality scoring showing 50 points with breakdown: Basic Info 20/20, Photos 10/20, Spare Parts 20/20, Critical Parts 0/20, Documentation 0/20"
+                    onClick={() => setLightboxImage({ src: '/screenshots/equipment-documentation-form.png', alt: 'Equipment Documentation form with real-time quality scoring showing 50 points with breakdown: Basic Info 20/20, Photos 10/20, Spare Parts 20/20, Critical Parts 0/20, Documentation 0/20' })}
                   />
                 </div>
               </div>
@@ -378,8 +378,8 @@ const HomePage: React.FC = () => {
                 <div className="order-2 md:order-1">
                   <ScreenshotPlaceholder
                     filename="manager-dashboard.png"
-                    alt="Manager dashboard showing active faults (3 critical, 7 minor, 24 resolved), maintenance tasks (5 overdue, 12 due soon), and inventory alerts (8 low stock)"
-                    onClick={() => setLightboxImage({ src: '/screenshots/manager-dashboard.png', alt: 'Manager dashboard showing active faults (3 critical, 7 minor, 24 resolved), maintenance tasks (5 overdue, 12 due soon), and inventory alerts (8 low stock)' })}
+                    alt="Electrical Manager Dashboard with KPI metrics (91.5% Team Performance, 2.5h Avg MTTR, 4.2% Missed PM, 94% Training Compliance, 12h Downtime, 85% Utilization), HSE Updates, and Private Support Chat"
+                    onClick={() => setLightboxImage({ src: '/screenshots/manager-dashboard.png', alt: 'Electrical Manager Dashboard with KPI metrics (91.5% Team Performance, 2.5h Avg MTTR, 4.2% Missed PM, 94% Training Compliance, 12h Downtime, 85% Utilization), HSE Updates, and Private Support Chat' })}
                   />
                 </div>
                 <div className="order-1 md:order-2">
