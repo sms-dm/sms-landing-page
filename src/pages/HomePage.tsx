@@ -895,8 +895,8 @@ const HomePage: React.FC = () => {
               {/* Government backing */}
               <div>
                 <div className="bg-sms-darkBlue/50 border-2 border-sms-electricBlue/30 rounded-xl p-8 relative">
-                  {/* Innovate UK Logo - Top Right */}
-                  <div className="absolute top-6 right-6">
+                  {/* Innovate UK Logo - Top Right on desktop, hidden on mobile */}
+                  <div className="hidden md:block absolute top-6 right-6">
                     <img
                       src="/innovate-uk-logo.png"
                       alt="Innovate UK"
@@ -904,8 +904,8 @@ const HomePage: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex items-center gap-4 mb-6 pr-24">
-                    <div className="w-16 h-16 bg-sms-neonBlue/20 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center gap-4 mb-4 md:mb-6 md:pr-24">
+                    <div className="w-16 h-16 bg-sms-neonBlue/20 rounded-lg flex items-center justify-center flex-shrink-0">
                       <svg className="w-10 h-10 text-sms-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
@@ -914,6 +914,15 @@ const HomePage: React.FC = () => {
                       <h3 className="text-xl font-bold text-white">Backed by UK Government</h3>
                       <p className="text-sm text-sms-mediumGray">Innovation Funding</p>
                     </div>
+                  </div>
+
+                  {/* Innovate UK Logo - Shown on mobile only, below title */}
+                  <div className="md:hidden mb-6">
+                    <img
+                      src="/innovate-uk-logo.png"
+                      alt="Innovate UK"
+                      className="h-10 opacity-90"
+                    />
                   </div>
 
                   <p className="text-sms-lightGray mb-6 leading-relaxed">
