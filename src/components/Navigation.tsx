@@ -87,7 +87,7 @@ const Navigation: React.FC<NavigationProps> = ({ onContactClick }) => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:hidden mt-4 pb-4"
+            className="md:hidden mt-4 bg-sms-deepBlue/95 backdrop-blur-md rounded-lg p-4 border border-sms-electricBlue/20"
           >
             {navLinks.map((link) => (
               <a
