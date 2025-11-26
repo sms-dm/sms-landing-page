@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navigation from '../components/Navigation';
 import PreviewNavigation from '../components/PreviewNavigation';
 import Footer from '../components/Footer';
@@ -78,23 +79,33 @@ const HomePage: React.FC = () => {
     setWelcomeComplete(true);
   };
 
-  // Show welcome sequence
-  if (showWelcome) {
-    return <WelcomeSequence onComplete={handleWelcomeComplete} />;
-  }
-
-  // Don't render main content until welcome is complete
-  if (!welcomeComplete) {
-    return null;
-  }
-
+  // Landing page is always rendered - welcome overlays on top and fades away
   return (
-    <div className="relative min-h-screen">
-      {/* Navigation */}
-      {isPreview ? (
-        <PreviewNavigation onContactClick={() => setShowContactModal(true)} />
-      ) : (
-        <Navigation onContactClick={() => setShowContactModal(true)} />
+    <>
+      {/* Welcome overlay - fades out to reveal landing page underneath */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            key="welcome-overlay"
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+          >
+            <WelcomeSequence onComplete={handleWelcomeComplete} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main landing page - always rendered underneath */}
+      <div className="relative min-h-screen">
+      {/* Navigation - only show after welcome completes */}
+      {welcomeComplete && (
+        isPreview ? (
+          <PreviewNavigation onContactClick={() => setShowContactModal(true)} />
+        ) : (
+          <Navigation onContactClick={() => setShowContactModal(true)} />
+        )
       )}
 
       {/* Main Content */}
@@ -987,7 +998,8 @@ const HomePage: React.FC = () => {
           imageAlt={lightboxImage.alt}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

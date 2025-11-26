@@ -94,13 +94,12 @@ const WelcomeSequence: React.FC<WelcomeSequenceProps> = ({ onComplete }) => {
               The Future of Maintenance Today
             </motion.p>
 
-            {/* Step 4: "Initializing..." appears */}
-            {showInitializing && (
+            {/* Step 4: "Initializing..." appears - fixed height container to prevent layout shift */}
+            <div className="mt-8 h-16">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: showInitializing ? 1 : 0 }}
                 transition={{ duration: 0.6 }}
-                className="mt-8"
               >
                 <div className="flex justify-center space-x-2 mb-3">
                   <motion.div
@@ -144,7 +143,7 @@ const WelcomeSequence: React.FC<WelcomeSequenceProps> = ({ onComplete }) => {
                 </div>
                 <p className="text-sms-lightGray text-lg">Initializing...</p>
               </motion.div>
-            )}
+            </div>
           </div>
         </div>
       </motion.div>
